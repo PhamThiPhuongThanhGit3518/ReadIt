@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -118,31 +119,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
               ),
               const SizedBox(height: 32),
-              Container(
-                width: double.infinity,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Color(0xFF261D25),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Color(0xFFFF0000).withOpacity(0.2),
-                    width: 1
-                  )
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      width: 24,
-                      'assets/icons/ic_logout.svg',
-                      colorFilter: ColorFilter.mode(Color(0xFFBA1313), BlendMode.srcIn),
-                    ),
-                    Text(
-                      '  Log out',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(color: Color(
-                          0xFFBA1313), fontWeight: FontWeight.bold)
-                    )
-                  ]
+              GestureDetector(
+                onTap: () {
+                  context.go('/sign_in');
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Color(0xFF261D25),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Color(0xFFFF0000).withOpacity(0.2),
+                          width: 1
+                      )
+                  ),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          width: 24,
+                          'assets/icons/ic_logout.svg',
+                          colorFilter: ColorFilter.mode(Color(0xFFBA1313), BlendMode.srcIn),
+                        ),
+                        Text(
+                            '  Log out',
+                            style: Theme.of(context).textTheme.displayMedium?.copyWith(color: Color(
+                                0xFFBA1313), fontWeight: FontWeight.bold)
+                        )
+                      ]
+                  ),
                 ),
               )
             ],

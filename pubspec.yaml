@@ -32,20 +32,30 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.2.3
-  go_router: ^13.1.0
-  drift: ^2.30.1
-  drift_flutter: ^0.2.8
-  flutter_riverpod: ^2.5.1
-  intl: ^0.18.1
-
+  go_router: ^17.0.1
+#  isar: ^3.1.0
+#  isar_flutter_libs: ^3.1.0
+#  isar_db: ^1.0.0  # hoặc phiên bản mới nhất trên pub.dev
+#  isar_db_flutter_libs: ^1.0.0  # hoặc mới nhất
+  isar_community: ^3.3.0  # Hoặc version mới nhất từ pub.dev
+  isar_community_flutter_libs: ^3.3.0
+  riverpod: ^3.2.0
+  flutter_riverpod: ^3.2.0
+  intl: ^0.20.2
+  path_provider: ^2.1.4
+  http: ^1.2.2
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 
 dev_dependencies:
+#  analyzer: ^5.13.0
+  analyzer: ^8.2.0
   flutter_test:
     sdk: flutter
-  drift_dev: ^2.30.1
-  build_runner: ^2.10.5
+#  isar_generator: ^3.1.0
+#  isar_db_generator: ^1.0.0  # hoặc mới nhất
+  isar_community_generator: ^3.3.0
+  build_runner: ^2.4.9
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

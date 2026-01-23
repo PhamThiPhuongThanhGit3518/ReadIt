@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/widgets/custom_role_card.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
+import '../../providers/auth_provider.dart';
 
-class SignUpScreen extends StatefulWidget {
+class SignUpScreen extends ConsumerStatefulWidget {
   @override
-  State<SignUpScreen> createState() => _SignUpScreen();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreen();
 }
 
-class _SignUpScreen extends State<SignUpScreen> {
+class _SignUpScreen extends ConsumerState<SignUpScreen> {
   String name = "";
   String phone = "";
   String password = "";
   String role = "";
+  bool _isLoading = false;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -99,17 +102,64 @@ class _SignUpScreen extends State<SignUpScreen> {
                     width: double.infinity,
                     height: 50,
                     child: FilledButton(
-                      onPressed: () {},
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)
+                        onPressed: _isLoading ? null : () async { // Ngăn nhấn nhiều lần khi đang load
+                          if (role.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Vui lòng chọn vai trò!')),
+                            );
+                            return;
+                          }
+
+                          setState(() {
+                            _isLoading = true;
+                          });
+
+                          try {
+                            final roleInt = role == 'Reader' ? 0 : 1;
+                            final success = await ref.read(authProvider.notifier).register(
+                                nameController.text,
+                                phoneController.text,
+                                passwordController.text,
+                                roleInt
+                            );
+
+                            if (success && mounted) {
+                              context.go('/home');
+                            } else if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Đăng ký thất bại. Số điện thoại có thể đã tồn tại.')),
+                              );
+                            }
+                          } finally {
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          }
+                        },
+                        style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)
+                            )
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white
+                            )
                         )
-                      ),
-                      child: Text(
-                        'Create Account',
-                        style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
-                      )
+                            : Text(
+                          'Create Account',
+                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white
+                          ),
+                        )
                     ),
                   ),
                 ),
@@ -136,5 +186,13 @@ class _SignUpScreen extends State<SignUpScreen> {
         ),
       )
     );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }

@@ -1,18 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LibraryScreen extends StatefulWidget {
+import '../../providers/auth_provider.dart';
+
+class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
   @override
-  State<LibraryScreen> createState() => _LibraryScreenState();
+  ConsumerState<LibraryScreen> createState() => _LibraryScreenState();
 }
 
-class _LibraryScreenState extends State<LibraryScreen> {
+class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(authProvider);
+    final tabs = user?.role == 0
+      ? ['Favourites', 'Offline', 'History']
+      : ['My stories', 'Favourite', 'Offline'];
+
     return Scaffold(
+      floatingActionButton: (user?.role == 1)
+        ? FloatingActionButton(
+          onPressed: () {},
+          child: Icon(
+            Icons.add,
+          )
+      ) : null,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(12),
@@ -33,65 +48,32 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
-                    children: [
-                      Expanded(
+                    children: List.generate(tabs.length, (index) {
+                      return Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => selectedIndex = 0),
+                          onTap: () => setState(() => selectedIndex = index),
                           child: Container(
                             height: 40,
                             decoration: BoxDecoration(
-                              color: selectedIndex == 0 ? Color(0xFF101922) : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12)
+                              color: selectedIndex == index
+                                  ? const Color(0xFF101922)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
                               child: Text(
-                                'Favourites',
+                                tabs[index],
                                 textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.displayMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14),
                               ),
                             ),
-                          )
-                        )
-                      ),
-                      Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => selectedIndex = 1),
-                            child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  color: selectedIndex == 1 ? Color(0xFF101922) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12)
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Offline',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            )
-                          )
-                      ),
-                      Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => selectedIndex = 2),
-                            child: Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                  color: selectedIndex == 2 ? Color(0xFF101922) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12)
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'History',
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            )
-                          )
-                      )
-                    ],
+                          ),
+                        ),
+                      );
+                    }),
                   ),
                 ),
               )

@@ -99,7 +99,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     'Don\'t have an account? '
                   ),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       context.go('/sign_up');
                     },
                     child: Text(

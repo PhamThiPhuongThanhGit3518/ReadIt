@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:read_it/core/app_route.dart';
 
-void main() {
+import 'database/isar_service.dart';
+
+void main() async {
   runApp(
     const ProviderScope(
       child: MyApp(),
