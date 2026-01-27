@@ -44,6 +44,15 @@ dependencies:
   intl: ^0.20.2
   path_provider: ^2.1.4
   http: ^1.2.2
+  dotted_border: ^2.1.0
+  image_picker: ^1.0.7
+  photo_manager: ^3.3.0
+  file_picker: ^8.0.0
+  permission_handler: ^11.3.1
+  dio: ^5.7.0                # HTTP client
+  retrofit: ^4.4.1           # Tạo API service tự động (check pub.dev cho latest)
+  json_annotation: ^4.9.0    # JSON serialization
+  shared_preferences: ^2.3.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 
@@ -56,6 +65,8 @@ dev_dependencies:
 #  isar_db_generator: ^1.0.0  # hoặc mới nhất
   isar_community_generator: ^3.3.0
   build_runner: ^2.4.9
+  retrofit_generator: ^10.2.1 # Generate code cho Retrofit
+  json_serializable: ^6.8.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
