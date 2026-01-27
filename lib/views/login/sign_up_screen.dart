@@ -102,7 +102,7 @@ class _SignUpScreen extends ConsumerState<SignUpScreen> {
                     width: double.infinity,
                     height: 50,
                     child: FilledButton(
-                        onPressed: _isLoading ? null : () async { // Ngăn nhấn nhiều lần khi đang load
+                        onPressed: _isLoading ? null : () async { 
                           if (role.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Vui lòng chọn vai trò!')),
