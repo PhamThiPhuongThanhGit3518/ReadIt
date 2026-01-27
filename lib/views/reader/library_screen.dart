@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../providers/auth_provider.dart';
 
@@ -23,7 +24,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     return Scaffold(
       floatingActionButton: (user?.role == 1)
         ? FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            context.push('/create_story');
+          },
           child: Icon(
             Icons.add,
           )
