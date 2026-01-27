@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../database/daos/user_dao.dart';
-import '../database/models/user_table.dart';
+import '../../database/daos/user_dao.dart';
+import '../../database/models/user_table.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   return UserRepository(ref.watch(userDaoProvider));
