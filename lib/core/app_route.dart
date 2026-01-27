@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/views/author/create_new_story_screen.dart';
+import 'package:read_it/views/author/upload_chapter_screen.dart';
 import 'package:read_it/views/reader/home_screen.dart';
 import 'package:read_it/views/reader/library_screen.dart';
 import 'package:read_it/views/reader/profile_screen.dart';
+import 'package:read_it/views/reader/read_chapter_screen.dart';
+import 'package:read_it/views/reader/story_detail_screen.dart';
 
 import '../layout/main_wrapper.dart';
 import '../views/login/sign_in_screen.dart';
@@ -20,6 +24,18 @@ class AppRoute {
       ),
       GoRoute(path: '/sign_in',
         builder: (context, state) => SignInScreen(),
+      ),
+      GoRoute(path: '/create_story',
+        builder: (context, state) => CreateNewStoryScreen(),
+      ),
+      GoRoute(path: '/upload_chapter',
+        builder: (context, state) => UploadChapterScreen(),
+      ),
+      GoRoute(path: '/story_detail',
+        builder: (context, state) => StoryDetailScreen(),
+      ),
+      GoRoute(path: '/read_chapter',
+        builder: (context, state) => ReadChapterScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainWrapper(navigationShell: navigationShell),
