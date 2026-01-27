@@ -1,8 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:read_it/providers/providers.dart';
 import '../database/models/user_table.dart';
-import '../repositories/user_repository.dart';
+import '../repositories/local/user_repository.dart';
 
 class AuthNotifier extends StateNotifier<User?> {
   AuthNotifier(this.repo) : super(null);
