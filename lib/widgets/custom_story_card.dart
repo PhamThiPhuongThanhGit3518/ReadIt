@@ -15,11 +15,7 @@ class CustomStoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String baseUrl = 'https://predict-guestbook-tri-bridal.trycloudflare.com';
-    final String fullImageUrl = (story.posterLink != null && story.posterLink!.startsWith('http'))
-        ? story.posterLink!
-        : '$baseUrl${story.posterLink ?? ""}';
-
+    const String imageBaseUrl = "http://notifications-rebel-lying-porcelain.trycloudflare.com/assets/images/poster/stories/";
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -34,7 +30,7 @@ class CustomStoryCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                fullImageUrl,
+              "$imageBaseUrl${story.coverImagePath}" ?? "https://www.shutterstock.com/shutterstock/videos/1039407446/thumb/1.jpg?ip=x480",
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
