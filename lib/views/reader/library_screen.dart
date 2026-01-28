@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../providers/auth_provider.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
@@ -16,13 +15,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProvider);
-    final tabs = user?.role == 0
-      ? ['Favourites', 'Offline', 'History']
-      : ['My stories', 'Favourite', 'Offline'];
+    final authState = ref.watch(authViewModelProvider);
+    final user = authState.asData?.value;
+    final bool isAuthor = user?.role == 'author';
+    final tabs = isAuthor
+      ? ['My stories', 'Favourite', 'Offline']
+      : ['Favourites', 'Offline', 'History'];
 
     return Scaffold(
-      floatingActionButton: (user?.role == 1)
+      floatingActionButton: isAuthor
         ? FloatingActionButton(
           onPressed: () {
             context.push('/create_story');
