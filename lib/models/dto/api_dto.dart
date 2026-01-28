@@ -126,14 +126,14 @@ class StorySummary {
   final String title;
   final int? viewCount;
   final int? chapterCount;
-  final String? posterLink;
+  final String? coverImagePath;
 
   StorySummary({
     required this.id,
     required this.title,
     this.viewCount,
     this.chapterCount,
-    this.posterLink,
+    this.coverImagePath,
   });
 
   factory StorySummary.fromJson(Map<String, dynamic> json) =>
@@ -158,7 +158,8 @@ class StoryDetail {
   final String description;
   final int chapterCount;
   final int viewCount;
-  final String? posterLink;
+  final int? favoriteCount;
+  final String? coverLink;
   final DateTime? createdAt;
 
   StoryDetail({
@@ -167,7 +168,8 @@ class StoryDetail {
     required this.description,
     required this.chapterCount,
     required this.viewCount,
-    this.posterLink,
+    required this.favoriteCount,
+    this.coverLink,
     this.createdAt,
   });
 
@@ -175,6 +177,21 @@ class StoryDetail {
       _$StoryDetailFromJson(json);
 }
 
+@JsonSerializable()
+class FavoriteResponse {
+  final bool success;
+  final bool isFavorited;
+  final String message;
+
+  FavoriteResponse({
+    required this.success,
+    required this.isFavorited,
+    required this.message,
+  });
+
+  factory FavoriteResponse.fromJson(Map<String, dynamic> json) =>
+      _$FavoriteResponseFromJson(json);
+}
 
 @JsonSerializable()
 class ChapterListResponse {
@@ -192,11 +209,14 @@ class ChapterSummary {
   final int id;
   final int orderNum;
   final String title;
+  @JsonKey(name: 'createdAt')
+  final DateTime? createdAt;
 
   ChapterSummary({
     required this.id,
     required this.orderNum,
     required this.title,
+    this.createdAt,
   });
 
   factory ChapterSummary.fromJson(Map<String, dynamic> json) =>
@@ -293,4 +313,15 @@ class UploadedChapter {
 
   factory UploadedChapter.fromJson(Map<String, dynamic> json) =>
       _$UploadedChapterFromJson(json);
+}
+
+@JsonSerializable()
+class CommonResponse {
+  final bool success;
+  final String message;
+
+  CommonResponse({required this.success, required this.message});
+
+  factory CommonResponse.fromJson(Map<String, dynamic> json) =>
+      _$CommonResponseFromJson(json);
 }
