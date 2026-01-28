@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
 
 import '../../services/file_picker_service.dart';
+import '../../viewmodels/story_viewmodel.dart';
 
 class CreateNewStoryScreen extends ConsumerStatefulWidget {
   const CreateNewStoryScreen({super.key});
@@ -29,6 +29,8 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final createStoryState = ref.watch(createStoryProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -153,8 +155,29 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
                       SizedBox(
                         height: 56,
                         child: FilledButton(
-                            onPressed: () {
-                              context.push('/upload_chapter');
+                            onPressed: createStoryState.isLoading
+                                ? null
+                                : () async {
+                              await ref.read(createStoryProvider.notifier).create(
+                                storyTitleController.text,
+                                descriptionController.text,
+                                _selectedImagePath != null ? File(_selectedImagePath!) : null,
+                              );
+
+                              final result = ref.read(createStoryProvider);
+                              if (result.hasValue && result.value?.success == true) {
+                                final newStoryId = result.value?.data?.storyId;
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Tạo truyện thành công!')),
+                                );
+
+                                context.push('/upload_chapter', extra: newStoryId);
+                              } else if (result.hasError) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Lỗi: ${result.error}')),
+                                );
+                              }
                             },
                             style: FilledButton.styleFrom(
                               shape: RoundedRectangleBorder(
