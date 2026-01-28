@@ -76,6 +76,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildDefaultHome() {
+    final newState = ref.watch(newStoriesProvider);
+    final popularState = ref.watch(popularStoriesProvider);
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,20 +87,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             'New Updates',
             style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
           ),
+          SizedBox(
+            height: 300,
+            child: _buildSearchResults(newState)
+          ),
           const SizedBox(height: 24),
           Text(
             'Most Popular',
             style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
           ),
-          const SizedBox(height: 24),
-          GestureDetector(
-            onTap: () => context.push('/story_detail'),
-            child: Text(
-              'Demo Story Details',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface),
-            ),
-          )
+          SizedBox(
+            height: 300,
+            child: _buildSearchResults(popularState)
+          ),
         ],
       ),
     );
@@ -114,7 +116,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             final story = stories[index];
             return CustomStoryCard(
               story: story,
-              onTap: () => context.push('/story_detail/${story.id}'),
+              onTap: () {
+                ref.invalidate(storyDetailProvider(story.id));
+                context.push('/story_detail/${story.id}');
+              },
               onPlayTap: () => context.push('/story/${story.id}/chapters/1'),
             );
           },
