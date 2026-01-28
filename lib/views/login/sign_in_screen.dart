@@ -81,38 +81,47 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   child: FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)
-                      )
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                      onPressed: () async {
-                        try {
-                          await ref.read(authViewModelProvider.notifier).login(
-                            emailController.text.trim(),
-                            passwordController.text,
-                          );
-                          if (context.mounted) {
-                            context.go('/home');
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  e.toString().contains('401') || e.toString().contains('Unauthorized')
-                                      ? 'Email hoặc mật khẩu không đúng!'
-                                      : 'Đăng nhập thất bại: $e',
-                                ),
-                                backgroundColor: Colors.redAccent,
-                              ),
-                            );
-                          }
+                    onPressed: ref.watch(authViewModelProvider).isLoading
+                        ? null
+                        : () async {
+                      try {
+                        await ref.read(authViewModelProvider.notifier).login(
+                          emailController.text.trim(),
+                          passwordController.text,
+                        );
+                        if (context.mounted) {
+                          context.go('/home');
                         }
-                      },
-                      child: Text(
-                        'Log In',
-                        style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
-                      )
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                e.toString().contains('401') || e.toString().contains('Unauthorized')
+                                    ? 'Email hoặc mật khẩu không đúng!'
+                                    : 'Đăng nhập thất bại: $e',
+                              ),
+                              backgroundColor: Colors.redAccent,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: ref.watch(authViewModelProvider).isLoading
+                        ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                        : Text(
+                      'Log In',
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
