@@ -43,19 +43,32 @@ abstract class ApiService {
       @Part(name: "poster") MultipartFile? posterFile,
       );
 
+  @PATCH("/api/stories/{storyId}/view")
+  Future<CommonResponse> incrementView(@Path("storyId") int storyId);
+
   @GET("/api/stories/{storyId}/info")
   Future<StoryInfoResponse> getStoryInfo(@Path("storyId") int storyId);
 
   @GET("/api/stories")
   Future<StoryListResponse> searchStories(@Query("search") String keyword);
 
+  @GET("/api/stories/top/new")
+  Future<StoryListResponse> getNewStories();
+
+  @GET("/api/stories/top/views")
+  Future<StoryListResponse> getPopularStories();
+
+  @POST("/api/stories/{id}/favorite")
+  Future<FavoriteResponse> toggleFavorite(@Path("id") int id);
 
   @MultiPart()
-  @POST("/api/stories/upload-chapters")
-  Future<UploadChaptersResponse> uploadChapters(
-      @Part() int storyId,
-      @Part(name: "chapters") List<MultipartFile> chapterFiles,
-  );
+  @POST("/api/stories/upload-chapter")
+  Future<UploadChaptersResponse> uploadSingleChapter(
+      @Part(name: "storyId") int storyId,
+      @Part(name: "chapterTitle") String title,
+      @Part(name: "orderNum") int orderNum,
+      @Part(name: "chapterFile") MultipartFile chapterFile,
+      );
 
   @GET("/api/stories/{storyId}/chapters")
   Future<ChapterListResponse> getChapterList(@Path("storyId") int storyId);
