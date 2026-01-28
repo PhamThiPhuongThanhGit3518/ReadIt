@@ -64,7 +64,13 @@ class CreateStoryViewModel extends StateNotifier<AsyncValue<StoryResponse?>> {
 }
 
 final storyDetailProvider = FutureProvider.family<StoryDetail?, int>((ref, id) async {
-  return ref.watch(storyRepositoryProvider).getStoryDetail(id);
+  final repo = ref.read(storyRepositoryProvider);
+  try {
+    await repo.incrementView(id);
+  } catch (e) {
+    print("Lỗi tăng view: $e");
+  }
+  return repo.getStoryDetail(id);
 });
 
 final chapterListProvider = FutureProvider.family<List<ChapterSummary>, int>((ref, id) async {
@@ -106,3 +112,11 @@ class UploadChapterViewModel extends StateNotifier<AsyncValue<void>> {
     }
   }
 }
+
+final newStoriesProvider = FutureProvider<List<StorySummary>>((ref) async {
+  return ref.watch(storyRepositoryProvider).getNewStories();
+});
+
+final popularStoriesProvider = FutureProvider<List<StorySummary>>((ref) async {
+  return ref.watch(storyRepositoryProvider).getPopularStories();
+});
