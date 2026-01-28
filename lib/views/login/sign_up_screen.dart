@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/widgets/custom_role_card.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
-import '../../providers/auth_provider.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   @override
@@ -12,13 +12,13 @@ class SignUpScreen extends ConsumerStatefulWidget {
 
 class _SignUpScreen extends ConsumerState<SignUpScreen> {
   String name = "";
-  String phone = "";
+  String email = "";
   String password = "";
   String role = "";
   bool _isLoading = false;
 
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   @override
@@ -55,10 +55,10 @@ class _SignUpScreen extends ConsumerState<SignUpScreen> {
                 ),
                 const SizedBox(height: 24,),
                 CustomTextField(
-                    label: 'Phone Number',
-                    hint: 'Enter your phone number',
+                    label: 'Email',
+                    hint: 'Enter your email',
                     isPassword: false,
-                    controller: phoneController
+                    controller: emailController
                 ),
                 const SizedBox(height: 24,),
                 CustomTextField(
@@ -102,64 +102,90 @@ class _SignUpScreen extends ConsumerState<SignUpScreen> {
                     width: double.infinity,
                     height: 50,
                     child: FilledButton(
-                        onPressed: _isLoading ? null : () async { 
-                          if (role.isEmpty) {
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                        if (nameController.text.trim().isEmpty ||
+                            emailController.text.trim().isEmpty ||
+                            passwordController.text.isEmpty ||
+                            role.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Vui lòng điền đầy đủ thông tin và chọn vai trò!'),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() => _isLoading = true);
+
+                        try {
+                          print(
+                            'name: ${nameController.text.trim()}, email: ${emailController.text.trim()}, password: ${passwordController.text}, role: $role',
+                          );
+                          await ref.read(authViewModelProvider.notifier).register(
+                            nameController.text.trim(),
+                            emailController.text.trim(),
+                            passwordController.text,
+                            role == 'Reader' ? 'viewer' : 'author',
+                          );
+                          ref.invalidate(authViewModelProvider);
+
+                          if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Vui lòng chọn vai trò!')),
+                              const SnackBar(
+                                content: Text('Đăng ký thành công! Đang chuyển hướng...'),
+                                backgroundColor: Colors.green,
+                              ),
                             );
-                            return;
+                            context.go('/home');
+                          }
+                        } catch (e) {
+                          String errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
+                          if (e.toString().contains('409') || e.toString().contains('already exists')) {
+                            errorMessage = 'Email này đã được sử dụng!';
+                          } else if (e.toString().contains('400') || e.toString().contains('validation')) {
+                            errorMessage = 'Thông tin không hợp lệ (email hoặc password không đúng định dạng).';
+                          } else if (e.toString().contains('network')) {
+                            errorMessage = 'Không có kết nối mạng. Kiểm tra lại kết nối!';
                           }
 
-                          setState(() {
-                            _isLoading = true;
-                          });
-
-                          try {
-                            final roleInt = role == 'Reader' ? 0 : 1;
-                            final success = await ref.read(authProvider.notifier).register(
-                                nameController.text,
-                                phoneController.text,
-                                passwordController.text,
-                                roleInt
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(errorMessage),
+                                backgroundColor: Colors.redAccent,
+                                duration: const Duration(seconds: 4),
+                              ),
                             );
-
-                            if (success && mounted) {
-                              context.go('/home');
-                            } else if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Đăng ký thất bại. Số điện thoại có thể đã tồn tại.')),
-                              );
-                            }
-                          } finally {
-                            if (mounted) {
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            }
                           }
-                        },
-                        style: FilledButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)
-                            )
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isLoading = false);
+                          }
+                        }
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
                         ),
-                        child: _isLoading
-                            ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white
-                            )
-                        )
-                            : Text(
-                          'Create Account',
-                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white
-                          ),
-                        )
+                      )
+                          : Text(
+                        'Create Account',
+                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -186,13 +212,5 @@ class _SignUpScreen extends ConsumerState<SignUpScreen> {
         ),
       )
     );
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    phoneController.dispose();
-    passwordController.dispose();
-    super.dispose();
   }
 }
