@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/utils/date_formatter.dart';
 import '../../models/dto/api_dto.dart';
 import '../../viewmodels/story_viewmodel.dart';
 
@@ -57,7 +58,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              storyDetailAsync.value?.posterLink ?? "https://lh7-rt.googleusercontent.com/docsz/AD_4nXd-JmBSGuLeZSkBuj38razGDVv45PcjJ6KhweCCwwHv1HfqwAwW8lY8HEba9IzJK0B_Z_9E8vcAiV02YF4jLO9eGgA6f-zqqOsCr8FtmhgCreaR5SSd9FxkuK2fr0Vdj6J_6r1tNHNmYACFiWkAs4EO1KHK?key=tE_qip6BHPL4g00JXL_X6Q",
+                              storyDetailAsync.value?.coverLink ?? "https://lh7-rt.googleusercontent.com/docsz/AD_4nXd-JmBSGuLeZSkBuj38razGDVv45PcjJ6KhweCCwwHv1HfqwAwW8lY8HEba9IzJK0B_Z_9E8vcAiV02YF4jLO9eGgA6f-zqqOsCr8FtmhgCreaR5SSd9FxkuK2fr0Vdj6J_6r1tNHNmYACFiWkAs4EO1KHK?key=tE_qip6BHPL4g00JXL_X6Q",
                               width: 150,
                               height: 150,
                               fit: BoxFit.cover,
@@ -82,7 +83,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                         const SizedBox(height: 18),
                         Center(
                           child: Text(
-                            storyDetailAsync.value!.title,
+                            storyDetailAsync.value?.title ?? 'Loading...',
                             style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
                           ),
                         ),
@@ -92,7 +93,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
                         ),
                         const SizedBox(height: 12),
-                        _buildStatsSection(storyDetailAsync),
+                        _buildStatsSection(),
                       ],
                     ),
                   ),
@@ -113,7 +114,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
           },
           body: TabBarView(
             children: [
-              _buildAboutContent(storyDetailAsync.value!.description),
+              _buildAboutContent(storyDetailAsync.value?.description ?? 'Loading...'),
               _buildAboutChapter(chaptersAsync),
               const Center(child: Text("Reviews", style: TextStyle(color: Colors.white))),
             ],
@@ -123,14 +124,14 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 
-  Widget _buildStatsSection(AsyncValue storyDetailAsync) {
+  Widget _buildStatsSection() {
     final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: Row(
         children: [
-          _buildStatItem('LIKES', '4.5K', icon: 'assets/icons/ic_heart.svg'),
+          _buildStatItem('LIKES', '${storyDetailAsync.value?.favoriteCount}', icon: 'assets/icons/ic_heart.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
           _buildStatItem('VIEWS', '${storyDetailAsync.value?.viewCount}', icon: 'assets/icons/ic_eye.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
@@ -211,7 +212,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            (index + 1).toString(), // Dùng index + 1 làm số chương
+                            chapter.orderNum.toString(),
                             style: Theme.of(context).textTheme.displayMedium?.copyWith(
                                 fontSize: 18,
                                 color: Theme.of(context).colorScheme.primary
@@ -230,9 +231,9 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const Text(
-                            "Mới cập nhật", // Server của anh chưa trả về ngày, tạm để text này
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          Text(
+                            DateFormatter.toRelativeTime(chapter.createdAt),
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
                           )
                         ],
                       ),
@@ -253,21 +254,4 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 }
-
-class ChapterItem {
-  final int number;
-  final String title;
-  final String date;
-
-  ChapterItem({required this.number, required this.title, required this.date});
-}
-
-final List<ChapterItem> chapters = [
-  ChapterItem(number: 1, title: 'The Awakening', date: 'Oct 12, 2023'),
-  ChapterItem(number: 2, title: 'The Forgotten Relic', date: 'Oct 15, 2023'),
-  ChapterItem(number: 3, title: 'Crystal Deserts', date: 'Oct 20, 2023'),
-  ChapterItem(number: 4, title: 'Day night', date: 'Oct 21, 2023'),
-  ChapterItem(number: 5, title: 'Remember the pass', date: 'Oct 22, 2023'),
-  ChapterItem(number: 6, title: 'See you again', date: 'Oct 25, 2023'),
-];
 
