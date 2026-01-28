@@ -31,11 +31,20 @@ class AppRoute {
       GoRoute(path: '/upload_chapter',
         builder: (context, state) => UploadChapterScreen(),
       ),
-      GoRoute(path: '/story_detail',
-        builder: (context, state) => StoryDetailScreen(),
+      GoRoute(
+        path: '/story_detail/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return StoryDetailScreen(storyId: id);
+        },
       ),
-      GoRoute(path: '/read_chapter',
-        builder: (context, state) => ReadChapterScreen(),
+      GoRoute(path: '/read_chapter/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return ReadChapterScreen(chapterId: id);
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainWrapper(navigationShell: navigationShell),
