@@ -13,7 +13,7 @@ class FilePickerService {
   Future<String?> pickDocument() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf'],
+      allowedExtensions: ['txt', 'md'],
     );
     return result?.files.single.path;
   }
