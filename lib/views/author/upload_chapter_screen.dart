@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
 
 import '../../services/file_picker_service.dart';
+import '../../viewmodels/story_viewmodel.dart';
 
 class UploadChapterScreen extends ConsumerStatefulWidget {
   const UploadChapterScreen({super.key});
@@ -22,8 +26,13 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
 
   final TextEditingController chapterNumberController = TextEditingController();
   final TextEditingController chapterTitleController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    final Object? extra = GoRouterState.of(context).extra;
+    final int? storyId = extra as int?;
+    final uploadState = ref.watch(uploadChapterProvider);
+
     return Scaffold(
       body: SafeArea(child: Padding(
         padding: EdgeInsets.all(12),
@@ -139,9 +148,33 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
             SizedBox(
               height: 56,
               child: FilledButton(
-                onPressed: () {
-                  context.go('/library');
-                },
+                  onPressed: (uploadState.isLoading || _selectedFilePath == null)
+                      ? null
+                      : () async {
+                    try {
+                      final file = File(_selectedFilePath!);
+                      final bytes = await file.readAsBytes();
+                      String content = utf8.decode(bytes, allowMalformed: true);
+
+                      await ref.read(uploadChapterProvider.notifier).upload(
+                        storyId: storyId!,
+                        title: chapterTitleController.text,
+                        content: content,
+                        orderNum: int.tryParse(chapterNumberController.text) ?? 1,
+                      );
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Đã đăng chương thành công!')),
+                        );
+                        context.go('/library');
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lỗi tải chương: $e')),
+                      );
+                    }
+                  },
                 style: FilledButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)
