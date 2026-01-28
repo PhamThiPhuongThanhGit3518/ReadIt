@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import '../../models/dto/api_dto.dart';
+import '../../viewmodels/story_viewmodel.dart';
 
 class StoryDetailScreen extends ConsumerStatefulWidget {
-  const StoryDetailScreen({super.key});
+  final int storyId;
+
+  const StoryDetailScreen({super.key, required this.storyId});
 
   @override
   ConsumerState<StoryDetailScreen> createState() => _StoryDetailScreenState();
@@ -13,6 +17,9 @@ class StoryDetailScreen extends ConsumerStatefulWidget {
 class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
   @override
   Widget build(BuildContext context) {
+    final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
+    final chaptersAsync = ref.watch(chapterListProvider(widget.storyId));
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F151C),
       body: DefaultTabController(
@@ -47,15 +54,37 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Image.asset(
-                            'assets/images/night.jpg',
-                            fit: BoxFit.cover,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              storyDetailAsync.value?.posterLink ?? "https://lh7-rt.googleusercontent.com/docsz/AD_4nXd-JmBSGuLeZSkBuj38razGDVv45PcjJ6KhweCCwwHv1HfqwAwW8lY8HEba9IzJK0B_Z_9E8vcAiV02YF4jLO9eGgA6f-zqqOsCr8FtmhgCreaR5SSd9FxkuK2fr0Vdj6J_6r1tNHNmYACFiWkAs4EO1KHK?key=tE_qip6BHPL4g00JXL_X6Q",
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  width: 150,
+                                  height: 150,
+                                  color: Colors.grey[900],
+                                  child: const Center(child: CircularProgressIndicator()),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 150,
+                                height: 150,
+                                color: Colors.grey,
+                                child: const Icon(Icons.broken_image, size: 50),
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 18),
-                        Text(
-                          'The Midnight Star',
-                          style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+                        Center(
+                          child: Text(
+                            storyDetailAsync.value!.title,
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -63,7 +92,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
                         ),
                         const SizedBox(height: 12),
-                        _buildStatsSection(context),
+                        _buildStatsSection(storyDetailAsync),
                       ],
                     ),
                   ),
@@ -84,8 +113,8 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
           },
           body: TabBarView(
             children: [
-              _buildAboutContent(),
-              _buildAboutChapter(),
+              _buildAboutContent(storyDetailAsync.value!.description),
+              _buildAboutChapter(chaptersAsync),
               const Center(child: Text("Reviews", style: TextStyle(color: Colors.white))),
             ],
           ),
@@ -94,7 +123,8 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 
-  Widget _buildStatsSection(BuildContext context) {
+  Widget _buildStatsSection(AsyncValue storyDetailAsync) {
+    final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
     return SizedBox(
       width: double.infinity,
       height: 50,
@@ -102,7 +132,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
         children: [
           _buildStatItem('LIKES', '4.5K', icon: 'assets/icons/ic_heart.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
-          _buildStatItem('VIEWS', '9.6K', icon: 'assets/icons/ic_eye.svg'),
+          _buildStatItem('VIEWS', '${storyDetailAsync.value?.viewCount}', icon: 'assets/icons/ic_eye.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
           _buildStatItem('STATUS', 'Completed', color: const Color(0xFF22C55E)),
         ],
@@ -131,7 +161,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 
-  Widget _buildAboutContent() {
+  Widget _buildAboutContent(String storyDetail) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -146,8 +176,8 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
             )).toList(),
           ),
           const SizedBox(height: 20),
-          const Text(
-            "In a world where the sun never sets, Elara discovers an ancient relic that can summon the \"Midnight Star\"—a legend that could either save her civilization or plunge it into eternal darkness.\n \nAs the royal guard closes in, Elara must journey across the Crystal Deserts to find the Oracle. But the star has a mind of its own, and its light is fading fast...",
+          Text(
+            storyDetail,
             style: TextStyle(color: Colors.white70, height: 1.6, fontSize: 15),
           ),
         ],
@@ -155,62 +185,71 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 
-  Widget _buildAboutChapter() {
-    return ListView.builder(
-        itemCount: chapters.length,
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          final chapter = chapters[index];
-          return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: GestureDetector(
-                  onTap: () {
-                    context.push('/read_chapter');
-                  },
-                  child:
-                    Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
+  Widget _buildAboutChapter(AsyncValue<List<ChapterSummary>> chaptersAsync) {
+    return chaptersAsync.when(
+      data: (chapterList) {
+        if (chapterList.isEmpty) {
+          return const Center(child: Text("Truyện chưa có chương nào", style: TextStyle(color: Colors.white70)));
+        }
+        return ListView.builder(
+          itemCount: chapterList.length,
+          padding: EdgeInsets.zero,
+          itemBuilder: (context, index) {
+            final chapter = chapterList[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: GestureDetector(
+                onTap: () => context.push('/read_chapter/${chapter.id}'),
+                child: Row(
+                  children: [
+                    Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12)
+                        ),
+                        child: Center(
+                          child: Text(
+                            (index + 1).toString(), // Dùng index + 1 làm số chương
+                            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                fontSize: 18,
+                                color: Theme.of(context).colorScheme.primary
+                            ),
                           ),
-                          child: Center(
-                            child: Text(
-                              chapter.number.toString(),
-                              style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 20,color: Theme.of(context).colorScheme.primary),
-                            ),
-                          )
-                        ),
-                        const SizedBox(width: 12,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              chapter.title,
-                              style: Theme.of(context).textTheme.displayMedium?.copyWith(color: Color(0xFFFFFFFF)),
-                            ),
-                            Text(
-                              chapter.date,
-                              style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface),
-                            )
-                          ],
-                        ),
-                        const Spacer(),
-                        IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.download)
-                        ),
-                      ],
+                        )
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            chapter.title,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Text(
+                            "Mới cập nhật", // Server của anh chưa trả về ngày, tạm để text này
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          )
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.download, color: Colors.grey)
+                    ),
+                  ],
                 ),
               ),
-          );
-        }
+            );
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text("Lỗi tải chương: $err")),
     );
   }
 }
