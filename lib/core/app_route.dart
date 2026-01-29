@@ -25,8 +25,14 @@ class AppRoute {
       GoRoute(path: '/sign_in',
         builder: (context, state) => SignInScreen(),
       ),
-      GoRoute(path: '/create_story',
-        builder: (context, state) => CreateNewStoryScreen(),
+      GoRoute(
+        path: '/create_story/:storyId',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final idString = state.pathParameters['storyId'];
+          final id = int.tryParse(idString ?? '') ?? -1;
+          return CreateNewStoryScreen(storyId: id);
+        },
       ),
       GoRoute(path: '/upload_chapter',
         builder: (context, state) => UploadChapterScreen(),
@@ -39,11 +45,16 @@ class AppRoute {
           return StoryDetailScreen(storyId: id);
         },
       ),
-      GoRoute(path: '/read_chapter/:id',
+      GoRoute(
+        path: '/read_chapter/:storyId/:chapterNum',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
-          return ReadChapterScreen(chapterId: id);
+          final storyId = int.parse(state.pathParameters['storyId']!);
+          final chapterNum = int.parse(state.pathParameters['chapterNum']!);
+          return ReadChapterScreen(
+            storyId: storyId,
+            chapterNum: chapterNum,
+          );
         },
       ),
       StatefulShellRoute.indexedStack(
