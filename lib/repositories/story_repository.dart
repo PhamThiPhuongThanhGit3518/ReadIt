@@ -1,4 +1,3 @@
-// repositories/story_repository.dart
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
@@ -29,6 +28,36 @@ class StoryRepository {
     return response.data;
   }
 
+  Future<List<StorySummary>> getFavoriteStories() async {
+    final response = await apiService.getFavoriteStories();
+    return response.data ?? [];
+  }
+
+  Future<List<StorySummary>> getProgressStories() async {
+    final response = await apiService.getProgressStories();
+    return response.data ?? [];
+  }
+
+  Future<List<StorySummary>> getStoriesByUser(int userId) async {
+    try {
+      print("Calling GET /api/stories/user/$userId");
+      final response = await apiService.getStoriesByUser(userId);
+      print("Raw response: ${response.toString()}");
+      print("Success: ${response.success}, Data length: ${response.data?.length ?? 0}");
+      if (response.data != null) {
+        print("First story: ${response.data![0]}");
+      }
+      return response.data ?? [];
+    } catch (e) {
+      print("Error in getStoriesByUser: $e");
+      if (e is DioException) {
+        print("Backend message: ${e.response?.data}");
+      }
+      return [];
+    }
+  }
+
+
   Future<StoryResponse> createStory({
     required String title,
     required String description,
@@ -48,6 +77,10 @@ class StoryRepository {
     return apiService.incrementView(storyId);
   }
 
+  Future<FavoriteResponse> toggleFavorite(int storyId) async {
+    return apiService.toggleFavorite(storyId);
+  }
+
   Future<List<ChapterSummary>> getChapters(int storyId) async {
     final response = await apiService.getChapterList(storyId);
     return response.data ?? [];
@@ -58,8 +91,8 @@ class StoryRepository {
     return response.data ?? [];
   }
 
-  Future<ChapterContentResponse> getChapterContent(int chapterId) async {
-    return apiService.getChapterContent(chapterId);
+  Future<ChapterContentResponse> getChapterByNumber(int storyId, int orderNum) async {
+    return apiService.getChapterByNumber(storyId, orderNum);
   }
 
   Future<UploadChaptersResponse> uploadChapter({
@@ -81,5 +114,17 @@ class StoryRepository {
       orderNum,
       file,
     );
+  }
+
+  Future<CommonResponse> deleteStory(int storyId) async {
+    return apiService.deleteStory(storyId);
+  }
+
+  Future<CommonResponse> deleteChapter(int chapterId) async {
+    return apiService.deleteChapter(chapterId);
+  }
+
+  Future<CommonResponse> deleteChapterByNumber(int storyId, int orderNum) async {
+    return apiService.deleteChapterByNumber(storyId, orderNum);
   }
 }
