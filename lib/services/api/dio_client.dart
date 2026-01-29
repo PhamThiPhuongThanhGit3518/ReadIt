@@ -4,7 +4,7 @@ import 'package:riverpod/riverpod.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    baseUrl: 'https://notifications-rebel-lying-porcelain.trycloudflare.com',
+    baseUrl: 'https://api.phongdaynai.id.vn',
     connectTimeout: const Duration(seconds: 30),
     receiveTimeout: const Duration(seconds: 30),
   ));
