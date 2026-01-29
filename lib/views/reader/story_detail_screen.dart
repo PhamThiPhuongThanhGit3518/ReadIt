@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/utils/date_formatter.dart';
 import '../../models/dto/api_dto.dart';
+import '../../providers/api_providers.dart';
 import '../../viewmodels/story_viewmodel.dart';
 
 class StoryDetailScreen extends ConsumerStatefulWidget {
@@ -16,6 +17,13 @@ class StoryDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(storyRepositoryProvider).incrementView(widget.storyId);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
@@ -126,14 +134,22 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
 
   Widget _buildStatsSection() {
     final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
+    final int favCount = storyDetailAsync.value?.favoriteCount ?? 0;
+
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: Row(
         children: [
-          _buildStatItem('LIKES', '${storyDetailAsync.value?.favoriteCount}', icon: 'assets/icons/ic_heart.svg'),
+          _buildStatItem(
+            'LIKES',
+            '$favCount',
+            icon: 'assets/icons/ic_heart.svg',
+            iconColor: favCount > 0 ? Colors.redAccent : const Color(0xFF94A3B8),
+            onTap: () => ref.read(storyDetailViewModelProvider.notifier).toggleFavorite(widget.storyId),
+          ),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
-          _buildStatItem('VIEWS', '${storyDetailAsync.value?.viewCount}', icon: 'assets/icons/ic_eye.svg'),
+          _buildStatItem('VIEWS', '${storyDetailAsync.value?.viewCount ?? 0}', icon: 'assets/icons/ic_eye.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
           _buildStatItem('STATUS', 'Completed', color: const Color(0xFF22C55E)),
         ],
@@ -141,23 +157,35 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, {String? icon, Color? color}) {
+  Widget _buildStatItem(String label, String value, {String? icon, Color? color, Color? iconColor, VoidCallback? onTap}) {
     return Expanded(
-      child: Column(
-        children: [
-          Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                SvgPicture.asset(icon, width: 14, height: 14, colorFilter: const ColorFilter.mode(Color(0xFF94A3B8), BlendMode.srcIn)),
-                const SizedBox(width: 4),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  SvgPicture.asset(
+                    icon,
+                    width: 14,
+                    height: 14,
+                    colorFilter: ColorFilter.mode(iconColor ?? const Color(0xFF94A3B8), BlendMode.srcIn),
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Text(
+                  value,
+                  style: TextStyle(color: color ?? Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                ),
               ],
-              Text(value, style: TextStyle(color: color ?? Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-            ],
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -200,7 +228,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: GestureDetector(
-                onTap: () => context.push('/read_chapter/${chapter.id}'),
+                onTap: () => context.push('/read_chapter/${widget.storyId}/${chapter.orderNum}'),
                 child: Row(
                   children: [
                     Container(
