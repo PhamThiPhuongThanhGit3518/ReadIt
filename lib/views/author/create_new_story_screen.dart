@@ -7,12 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
-
+import '../../providers/api_providers.dart';
 import '../../services/file_picker_service.dart';
 import '../../viewmodels/story_viewmodel.dart';
 
 class CreateNewStoryScreen extends ConsumerStatefulWidget {
-  const CreateNewStoryScreen({super.key});
+  final int storyId;
+
+  const CreateNewStoryScreen({super.key, required this.storyId});
 
   @override
   ConsumerState<CreateNewStoryScreen> createState() => _CreateNewStoryScreenState();
@@ -21,6 +23,7 @@ class CreateNewStoryScreen extends ConsumerStatefulWidget {
 class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
   String storyTitle = "";
   String description = "";
+  String image = "";
 
   String? _selectedImagePath;
 
@@ -28,8 +31,26 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
   final TextEditingController descriptionController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.storyId != -1) {
+      Future.microtask(() async {
+        final story = await ref.read(storyRepositoryProvider).getStoryDetail(widget.storyId);
+        if (story != null) {
+          setState(() {
+            storyTitleController.text = story.title;
+            descriptionController.text = story.description ?? "";
+            image = story.coverLink ?? '';
+          });
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final createStoryState = ref.watch(createStoryProvider);
+    final bool isEdit = widget.storyId != -1;
 
     return Scaffold(
       body: SafeArea(
@@ -50,7 +71,7 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
                     ),
                   ),
                   Text(
-                    '  Create New Story',
+                    isEdit ? '  Edit Your Story' : '  Create New Story',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
                   )
                 ],
@@ -97,21 +118,27 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
                               }
                             },
                             child: Container(
-                              width: 200,
-                              height: 300,
-                              color: const Color(0xFF1A222D),
-                              child: _selectedImagePath != null
-                                  ? Image.file(File(_selectedImagePath!), fit: BoxFit.cover)
-                                  :Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(Icons.add_photo_alternate, size: 50, color: Colors.blue),
-                                  SizedBox(height: 10),
-                                  Text("Upload Cover", style: TextStyle(color: Colors.white, fontSize: 16)),
-                                  Text("600 x 900px recommended", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                                ],
-                              ),
+                            width: 200,
+                            height: 300,
+                            color: const Color(0xFF1A222D),
+                            child: _selectedImagePath != null
+                                ? Image.file(File(_selectedImagePath!), fit: BoxFit.cover)
+                                : (image.isNotEmpty)
+                                ? Image.network(
+                              image,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                            )
+                                : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.add_photo_alternate, size: 50, color: Colors.blue),
+                                SizedBox(height: 10),
+                                Text("Upload Cover", style: TextStyle(color: Colors.white, fontSize: 16)),
+                                Text("600 x 900px recommended", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              ],
                             ),
+                          ),
                           ),
                         ),
                       ),
@@ -188,7 +215,7 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Save & Continue  ',
+                                  isEdit ? 'Update Changes  ' : 'Save & Continue  ',
                                   style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 24),
                                 ),
                                 SvgPicture.asset(
