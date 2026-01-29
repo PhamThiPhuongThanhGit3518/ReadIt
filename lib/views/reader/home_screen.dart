@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/widgets/custom_popular_story_card.dart';
 import 'package:read_it/widgets/custom_story_card.dart';
 import '../../viewmodels/story_viewmodel.dart';
 
@@ -78,39 +79,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildDefaultHome() {
     final newState = ref.watch(newStoriesProvider);
     final popularState = ref.watch(popularStoriesProvider);
+    double screenWith = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'New Updates',
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
-          ),
-          SizedBox(
-            height: 300,
-            child: _buildSearchResults(newState)
-          ),
           const SizedBox(height: 24),
           Text(
             'Most Popular',
             style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
           ),
+          const SizedBox(height: 12),
           SizedBox(
-            height: 300,
-            child: _buildSearchResults(popularState)
+              height: screenHeight * (1/3.2),
+              width: screenWith,
+              child: _buildPopularStories(popularState)
           ),
+          const SizedBox(height: 24),
+          Text(
+            'New Updates',
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+          ),
+          const SizedBox(height: 12),
+          _buildSearchResults(newState, isScrollable: false),
         ],
       ),
     );
   }
-  Widget _buildSearchResults(AsyncValue storyState) {
+
+  Widget _buildPopularStories(AsyncValue storyState) {
     return storyState.when(
       data: (stories) {
         if (stories.isEmpty) {
           return const Center(child: Text("Không tìm thấy truyện nào"));
         }
         return ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: stories.length,
+          itemBuilder: (context, index) {
+            final story = stories[index];
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: CustomPopularStoryCard(
+                story: story,
+                onTap: () {
+                  ref.invalidate(storyDetailProvider(story.id));
+                  context.push('/story_detail/${story.id}');
+                },
+              ),
+            );
+          }
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Lỗi tải truyện: $err')),
+    );
+  }
+  Widget _buildSearchResults(AsyncValue storyState, {bool isScrollable = true}) {
+    return storyState.when(
+      data: (stories) {
+        if (stories.isEmpty) return const Center(child: Text("Không tìm thấy truyện nào"));
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: isScrollable ? null : const NeverScrollableScrollPhysics(),
           itemCount: stories.length,
           itemBuilder: (context, index) {
             final story = stories[index];
@@ -120,7 +154,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ref.invalidate(storyDetailProvider(story.id));
                 context.push('/story_detail/${story.id}');
               },
-              onPlayTap: () => context.push('/story/${story.id}/chapters/1'),
             );
           },
         );
