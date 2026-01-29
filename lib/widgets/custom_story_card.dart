@@ -15,7 +15,7 @@ class CustomStoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String imageBaseUrl = "http://notifications-rebel-lying-porcelain.trycloudflare.com/assets/images/poster/stories/";
+    const String imageBaseUrl = "https://api.phongdaynai.id.vn/assets/images/poster/stories/";
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -30,7 +30,9 @@ class CustomStoryCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-              "$imageBaseUrl${story.coverImagePath}" ?? "https://www.shutterstock.com/shutterstock/videos/1039407446/thumb/1.jpg?ip=x480",
+                story.coverImagePath != null && story.coverImagePath!.isNotEmpty
+                    ? "$imageBaseUrl${story.coverImagePath}"
+                    : "https://img.idesign.vn/2018/10/23/id-loading-1.gif",
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
@@ -83,7 +85,7 @@ class CustomStoryCard extends StatelessWidget {
 
             IconButton(
               onPressed: onPlayTap,
-              icon: const Icon(Icons.play_circle_fill, size: 48, color: Color(0xFF1A73E8)),
+              icon: const Icon(Icons.play_circle_fill, size: 40, color: Color(0xFF1A73E8)),
             ),
           ],
         ),
