@@ -5,12 +5,19 @@ import 'package:go_router/go_router.dart';
 import '../../viewmodels/story_viewmodel.dart';
 
 class ReadChapterScreen extends ConsumerWidget {
-  final int chapterId;
-  const ReadChapterScreen({super.key, required this.chapterId});
+  final int storyId;
+  final int chapterNum;
+
+  const ReadChapterScreen({super.key, required this.storyId, required this.chapterNum});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chapterAsync = ref.watch(chapterDetailProvider(chapterId));
+    final chapterAsync = ref.watch(chapterByOrderProvider((
+      storyId: storyId,
+      orderNum: chapterNum,
+    )));
+
+    final totalChapter = ref.watch(storyDetailProvider(storyId)).value?.chapterCount;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F151C),
@@ -43,7 +50,7 @@ class ReadChapterScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  _buildBottomNav(context),
+                  _buildBottomNav(context, totalChapter ?? 0),
                 ],
               ),
             );
@@ -84,7 +91,7 @@ class ReadChapterScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
+  Widget _buildBottomNav(BuildContext context, int totalChapter) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
@@ -95,21 +102,39 @@ class ReadChapterScreen extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildNavButton(context, 'PREVIOUS', 'assets/icons/ic_back.svg'),
+            _buildNavButton(
+              context: context,
+              label: 'PREVIOUS',
+              icon: 'assets/icons/ic_back.svg',
+              onTap: () {
+                if (chapterNum > 1) {
+                  context.pushReplacement('/read_chapter/$storyId/${chapterNum - 1}');
+                }
+              },
+            ),
             const Spacer(),
-            _buildNavButton(context, 'NEXT', 'assets/icons/ic_next.svg'),
+            _buildNavButton(
+              context: context,
+              label: 'NEXT',
+              icon: 'assets/icons/ic_next.svg',
+              onTap: () {
+                if (chapterNum < totalChapter) {
+                  context.pushReplacement('/read_chapter/$storyId/${chapterNum + 1}');
+                }
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavButton(BuildContext context, String label, String icon) {
+  Widget _buildNavButton({required BuildContext context, required String label, required String icon, required VoidCallback onTap}) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          onPressed: () {},
+          onPressed: onTap,
           icon: SvgPicture.asset(
             icon,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
