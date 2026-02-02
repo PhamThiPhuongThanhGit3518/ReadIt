@@ -8,10 +8,10 @@ class CustomPublishWorkCard extends StatelessWidget {
   final StorySummary story;
   final VoidCallback onEditStory;
   final VoidCallback onDeleteStory;
-  final VoidCallback onAddChapter;
+  final VoidCallback onEditChapter;
 
 
-  const CustomPublishWorkCard({super.key, required this.story, required this.onEditStory, required this.onDeleteStory, required this.onAddChapter});
+  const CustomPublishWorkCard({super.key, required this.story, required this.onEditStory, required this.onDeleteStory, required this.onEditChapter});
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +81,10 @@ class CustomPublishWorkCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12)
                               )
                           ),
-                          onPressed: onAddChapter,
+                          onPressed: onEditChapter,
                           child: Text(
                             textAlign: TextAlign.center,
-                            'Add\nChapter',
+                            'Edit\nChapter',
                             style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Color(0xFF137EEA), fontWeight: FontWeight.bold),
                           )
                       ),
