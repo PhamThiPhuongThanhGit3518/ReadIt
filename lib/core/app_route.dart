@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/views/author/create_new_story_screen.dart';
+import 'package:read_it/views/author/edit_chapter_screen.dart';
 import 'package:read_it/views/author/upload_chapter_screen.dart';
 import 'package:read_it/views/reader/home_screen.dart';
 import 'package:read_it/views/reader/library_screen.dart';
@@ -8,15 +9,17 @@ import 'package:read_it/views/reader/profile_screen.dart';
 import 'package:read_it/views/reader/read_chapter_screen.dart';
 import 'package:read_it/views/reader/story_detail_screen.dart';
 
+import '../database/models/offline_chapter.dart';
 import '../layout/main_wrapper.dart';
 import '../views/login/sign_in_screen.dart';
 import '../views/login/sign_up_screen.dart';
+import '../views/reader/read_offline_screen.dart';
 
 class AppRoute {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
   static final route = GoRouter(
-    initialLocation: '/sign_up',
+    initialLocation: '/sign_in',
     navigatorKey: _rootNavigatorKey,
     routes: [
       GoRoute(path: '/sign_up',
@@ -34,8 +37,29 @@ class AppRoute {
           return CreateNewStoryScreen(storyId: id);
         },
       ),
-      GoRoute(path: '/upload_chapter',
-        builder: (context, state) => UploadChapterScreen(),
+      GoRoute(
+        path: '/edit_chapter/:storyId',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final idString = state.pathParameters['storyId'];
+          final id = int.tryParse(idString ?? '') ?? -1;
+          return EditChapterScreen(storyId: id);
+        },
+      ),
+      GoRoute(path: '/upload_chapter/:storyId/:chapterId',
+        builder: (context, state) {
+          return UploadChapterScreen(
+            storyId: int.parse(state.pathParameters['storyId']!),
+            chapterId: int.parse(state.pathParameters['chapterId']!),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/read_offline',
+        builder: (context, state) {
+          final chapter = state.extra as OfflineChapter;
+          return ReadOfflineScreen(chapter: chapter);
+        },
       ),
       GoRoute(
         path: '/story_detail/:id',
