@@ -34,6 +34,8 @@ class CustomPopularStoryCard extends StatelessWidget {
             Text(
               story.title,
               style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
             Text(
