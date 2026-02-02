@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_community/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:read_it/core/app_route.dart';
+import 'package:read_it/providers/isar_providers.dart';
 
-import 'database/isar_service.dart';
+import 'database/models/offline_chapter.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final dir = await getApplicationDocumentsDirectory();
+
+  final isar = await Isar.open(
+    [OfflineChapterSchema],
+    directory: dir.path,
+  );
+
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [
+        isarProvider.overrideWithValue(isar),
+      ],
+      child: const MyApp(),
     ),
   );
 }
