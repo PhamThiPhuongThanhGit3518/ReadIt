@@ -4,31 +4,31 @@ import 'package:read_it/models/dto/api_dto.dart';
 
 part 'api_service.g.dart';
 
-@RestApi(baseUrl: "")
+@RestApi(baseUrl: "https://api.phongdaynai.id.vn/v1")
 abstract class ApiService {
   factory ApiService(Dio dio, {String? baseUrl}) = _ApiService;
 
-  @POST("/v1/auth/register")
+  @POST("/auth/register")
   Future<UserDto> register(@Body() RegisterRequest request);
 
-  @POST("/v1/auth/login")
+  @POST("/auth/login")
   Future<AuthResponse> login(@Body() LoginRequest request);
 
-  @GET("/v1/auth/me")
+  @GET("/auth/me")
   Future<UserDto> getCurrentUser();
 
 
-  @GET("/v1/users/profile")
+  @GET("/users/profile")
   Future<UserDto> getProfile();
 
-  @PUT("/v1/users/profile")
+  @PUT("/users/profile")
   Future<UserDto> updateProfile(@Body() UpdateProfileRequest request);
 
 
-  @GET("/v1/users")
+  @GET("/users")
   Future<AdminUsersResponse> getAllUsers();
 
-  @PATCH("/v1/users/{id}/role")
+  @PATCH("/users/{id}/role")
   Future<SetRoleResponse> setUserRole(
       @Path("id") int userId,
       @Body() SetRoleRequest request,
@@ -36,42 +36,39 @@ abstract class ApiService {
 
 
   @MultiPart()
-  @POST("/v1/stories")
+  @POST("/stories")
   Future<StoryResponse> createStory(
       @Part() String title,
       @Part() String description,
       @Part(name: "poster") MultipartFile? posterFile,
       );
 
-  @GET("/v1/stories/me/favorites")
+  @GET("/stories/me/favorites")
   Future<StoryListResponse> getFavoriteStories();
 
-  @GET("/v1/stories/user/{userId}")
+  @GET("/stories/user/{userId}")
   Future<StoryListResponse> getStoriesByUser(@Path("userId") int userId);
 
-  @GET("/v1/stories/me/progress")
-  Future<StoryListResponse> getProgressStories();
+  @GET("/stories/me/progress")
+  Future<StoryProgressResponse> getProgressStories();
 
-  @PATCH("/v1/stories/{storyId}/view")
-  Future<CommonResponse> incrementView(@Path("storyId") int storyId);
-
-  @GET("/v1/stories/{storyId}/info")
+  @GET("/stories/{storyId}/info")
   Future<StoryInfoResponse> getStoryInfo(@Path("storyId") int storyId);
 
-  @GET("/v1/stories")
+  @GET("/stories")
   Future<StoryListResponse> searchStories(@Query("search") String keyword);
 
-  @GET("/v1/stories/top/new")
+  @GET("/stories/top/new")
   Future<StoryListResponse> getNewStories();
 
-  @GET("/v1/stories/top/views")
+  @GET("/stories/top/views")
   Future<StoryListResponse> getPopularStories();
 
-  @POST("/v1/stories/{id}/favorite")
+  @POST("/stories/{id}/favorite")
   Future<FavoriteResponse> toggleFavorite(@Path("id") int id);
 
   @MultiPart()
-  @POST("/v1/stories/upload-chapter")
+  @POST("/stories/upload-chapter")
   Future<UploadChaptersResponse> uploadSingleChapter(
       @Part(name: "storyId") int storyId,
       @Part(name: "chapterTitle") String title,
@@ -79,24 +76,24 @@ abstract class ApiService {
       @Part(name: "chapterFile") MultipartFile chapterFile,
       );
 
-  @GET("/v1/stories/{storyId}/chapters")
+  @GET("/stories/{storyId}/chapters")
   Future<ChapterListResponse> getChapterList(@Path("storyId") int storyId);
 
-  @GET("/v1/stories/personalized/chapters/:chapterId")
+  @GET("/stories/personalized/chapters/:chapterId")
   Future<ChapterContentResponse> getChapterContent(@Path("chapterId") int chapterId);
 
-  @GET("/v1/stories/{storyId}/chapters/{orderNum}")
+  @GET("/stories/personalized/{storyId}/chapters/{orderNum}")
   Future<ChapterContentResponse> getChapterByNumber(
       @Path("storyId") int storyId,
       @Path("orderNum") int orderNum,
   );
   
-  @DELETE('/v1/stories/{storyId}')
+  @DELETE('/stories/{storyId}')
   Future<CommonResponse> deleteStory(@Path("storyId") int storyId);
 
-  @DELETE('/v1/stories/chapters/{chapterId}')
+  @DELETE('/stories/chapters/{chapterId}')
   Future<CommonResponse> deleteChapter(@Path("chapterId") int chapterId);
 
-  @DELETE('/v1/stories/{storyId}/chapters/{orderNum}')
+  @DELETE('/stories/{storyId}/chapters/{orderNum}')
   Future<CommonResponse> deleteChapterByNumber(@Path("storyId") int storyId, @Path("orderNum") int orderNum);
 }

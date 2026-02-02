@@ -11,7 +11,9 @@ part of 'api_service.dart';
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main
 
 class _ApiService implements ApiService {
-  _ApiService(this._dio, {this.baseUrl, this.errorLogger});
+  _ApiService(this._dio, {this.baseUrl, this.errorLogger}) {
+    baseUrl ??= 'https://api.phongdaynai.id.vn/v1';
+  }
 
   final Dio _dio;
 
@@ -30,7 +32,7 @@ class _ApiService implements ApiService {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/auth/register',
+            '/auth/register',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -58,7 +60,7 @@ class _ApiService implements ApiService {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/auth/login',
+            '/auth/login',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -85,7 +87,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/auth/me',
+            '/auth/me',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -112,7 +114,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/users/profile',
+            '/users/profile',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -140,7 +142,7 @@ class _ApiService implements ApiService {
       Options(method: 'PUT', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/users/profile',
+            '/users/profile',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -167,7 +169,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/users',
+            '/users',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -198,7 +200,7 @@ class _ApiService implements ApiService {
       Options(method: 'PATCH', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/users/${userId}/role',
+            '/users/${userId}/role',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -240,7 +242,7 @@ class _ApiService implements ApiService {
           )
           .compose(
             _dio.options,
-            '/api/stories',
+            '/stories',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -267,7 +269,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/me/favorites',
+            '/stories/me/favorites',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -294,7 +296,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/user/${userId}',
+            '/stories/user/${userId}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -312,25 +314,25 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<StoryListResponse> getProgressStories() async {
+  Future<StoryProgressResponse> getProgressStories() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<StoryListResponse>(
+    final _options = _setStreamType<StoryProgressResponse>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/me/progress',
+            '/stories/me/progress',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late StoryListResponse _value;
+    late StoryProgressResponse _value;
     try {
-      _value = StoryListResponse.fromJson(_result.data!);
+      _value = StoryProgressResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -348,7 +350,7 @@ class _ApiService implements ApiService {
       Options(method: 'PATCH', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${storyId}/view',
+            '/stories/${storyId}/view',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -375,7 +377,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${storyId}/info',
+            '/stories/${storyId}/info',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -402,7 +404,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories',
+            '/stories',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -429,7 +431,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/top/new',
+            '/stories/top/new',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -456,7 +458,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/top/views',
+            '/stories/top/views',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -483,7 +485,7 @@ class _ApiService implements ApiService {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${id}/favorite',
+            '/stories/${id}/favorite',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -524,7 +526,7 @@ class _ApiService implements ApiService {
           )
           .compose(
             _dio.options,
-            '/api/stories/upload-chapter',
+            '/stories/upload-chapter',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -551,7 +553,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${storyId}/chapters',
+            '/stories/${storyId}/chapters',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -578,7 +580,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/personalized/chapters/:chapterId',
+            '/stories/personalized/chapters/:chapterId',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -608,7 +610,7 @@ class _ApiService implements ApiService {
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${storyId}/chapters/${orderNum}',
+            '/stories/personalized/${storyId}/chapters/${orderNum}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -635,7 +637,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${storyId}',
+            '/stories/${storyId}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -662,7 +664,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/chapters/${chapterId}',
+            '/stories/chapters/${chapterId}',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -692,7 +694,7 @@ class _ApiService implements ApiService {
       Options(method: 'DELETE', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/stories/${storyId}/chapters/${orderNum}',
+            '/stories/${storyId}/chapters/${orderNum}',
             queryParameters: queryParameters,
             data: _data,
           )
