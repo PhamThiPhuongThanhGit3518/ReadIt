@@ -3,9 +3,9 @@
   import 'package:flutter_riverpod/flutter_riverpod.dart';
   import 'package:flutter_svg/flutter_svg.dart';
   import 'package:go_router/go_router.dart';
-  import 'package:read_it/services/new_viewmodels/story_detail_viewmodel.dart';
+  import 'package:read_it/services/viewmodels/story_detail_viewmodel.dart';
   import 'package:read_it/widgets/custom_edit_chapter_card.dart';
-  import '../../services/new_viewmodels/chapter_viewmodel.dart';
+  import '../../services/viewmodels/chapter_viewmodel.dart';
 
   class EditChapterScreen extends ConsumerStatefulWidget {
     final int storyId;

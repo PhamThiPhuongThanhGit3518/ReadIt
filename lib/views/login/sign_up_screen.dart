@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/widgets/custom_role_card.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
-import '../../viewmodels/auth_viewmodel.dart';
+import '../../services/viewmodels/auth_viewmodel.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   @override

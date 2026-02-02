@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/services/viewmodels/create_story_viewmodel.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
 import '../../providers/api_providers.dart';
 import '../../services/file_picker_service.dart';
-import '../../viewmodels/story_viewmodel.dart';
 
 class CreateNewStoryScreen extends ConsumerStatefulWidget {
   final int storyId;
@@ -49,7 +49,7 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final createStoryState = ref.watch(createStoryProvider);
+    final homeState = ref.watch(createStoryViewModelProvider);
     final bool isEdit = widget.storyId != -1;
 
     return Scaffold(
@@ -182,29 +182,15 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
                       SizedBox(
                         height: 56,
                         child: FilledButton(
-                            onPressed: createStoryState.isLoading
-                                ? null
-                                : () async {
-                              await ref.read(createStoryProvider.notifier).create(
+                            onPressed: () {
+                              ref.read(createStoryViewModelProvider.notifier).createStory(
                                 storyTitleController.text,
                                 descriptionController.text,
                                 _selectedImagePath != null ? File(_selectedImagePath!) : null,
                               );
-
-                              final result = ref.read(createStoryProvider);
-                              if (result.hasValue && result.value?.success == true) {
-                                final newStoryId = result.value?.data?.storyId;
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Tạo truyện thành công!')),
-                                );
-
-                                context.push('/upload_chapter', extra: newStoryId);
-                              } else if (result.hasError) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Lỗi: ${result.error}')),
-                                );
-                              }
+                              final result = ref.read(createStoryViewModelProvider);
+                              final newStory = result.story.value?.data?.storyId;
+                              context.push('/upload_chapter/${newStory}/-1');
                             },
                             style: FilledButton.styleFrom(
                               shape: RoundedRectangleBorder(

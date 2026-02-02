@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import '../../viewmodels/story_viewmodel.dart';
+import 'package:read_it/services/viewmodels/story_detail_viewmodel.dart';
+import '../../services/viewmodels/chapter_viewmodel.dart';
 
 class ReadChapterScreen extends ConsumerWidget {
   final int storyId;
@@ -17,7 +18,7 @@ class ReadChapterScreen extends ConsumerWidget {
       orderNum: chapterNum,
     )));
 
-    final totalChapter = ref.watch(storyDetailProvider(storyId)).value?.chapterCount;
+    final totalChapter = ref.watch(storyDetailViewModelProvider).story.value?.chapterCount;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F151C),

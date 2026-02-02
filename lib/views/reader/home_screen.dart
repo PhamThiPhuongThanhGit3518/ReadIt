@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/services/viewmodels/story_list_viewmodel.dart';
 import 'package:read_it/widgets/custom_popular_story_card.dart';
 import 'package:read_it/widgets/custom_story_card.dart';
-import '../../viewmodels/story_viewmodel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -17,8 +17,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool isSearching = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(storyListViewModelProvider.notifier).fetchNewStories();
+      ref.read(storyListViewModelProvider.notifier).fetchPopularStories();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final storyState = ref.watch(storyListProvider);
+    final storyListState = ref.watch(storyListViewModelProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -33,7 +42,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     IconButton(
                       onPressed: () {
                         setState(() => isSearching = false);
-                        ref.read(storyListProvider.notifier).fetchStories();
+                        ref.read(storyListViewModelProvider.notifier).fetchStories();
                         searchController.clear();
                       },
                       icon: Icon(Icons.arrow_back),
@@ -49,7 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       onSubmitted: (value) {
                         if (value.isNotEmpty) {
                           setState(() => isSearching = true);
-                          ref.read(storyListProvider.notifier).search(value);
+                          ref.read(storyListViewModelProvider.notifier).search(value);
                         }
                       },
                       decoration: InputDecoration(
@@ -66,7 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 24),
               Expanded(
                 child: isSearching
-                    ? _buildSearchResults(storyState)
+                    ? _buildSearchResults(storyListState.stories)
                     : _buildDefaultHome(),
               ),
             ],
@@ -77,8 +86,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildDefaultHome() {
-    final newState = ref.watch(newStoriesProvider);
-    final popularState = ref.watch(popularStoriesProvider);
+    final storyListState = ref.watch(storyListViewModelProvider);
+    final newState = storyListState.newStories;
+    final popularState = storyListState.popularStories;
     double screenWith = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
@@ -125,7 +135,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: CustomPopularStoryCard(
                 story: story,
                 onTap: () {
-                  ref.invalidate(storyDetailProvider(story.id));
                   context.push('/story_detail/${story.id}');
                 },
               ),
@@ -151,7 +160,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             return CustomStoryCard(
               story: story,
               onTap: () {
-                ref.invalidate(storyDetailProvider(story.id));
                 context.push('/story_detail/${story.id}');
               },
             );

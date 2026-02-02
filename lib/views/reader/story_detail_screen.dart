@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/services/viewmodels/chapter_viewmodel.dart';
+import 'package:read_it/services/viewmodels/story_detail_viewmodel.dart';
 import 'package:read_it/utils/date_formatter.dart';
 import '../../models/dto/api_dto.dart';
 import '../../providers/api_providers.dart';
-import '../../viewmodels/story_viewmodel.dart';
+import '../../services/viewmodels/offline/offline_viewmodel.dart';
 
 class StoryDetailScreen extends ConsumerStatefulWidget {
   final int storyId;
@@ -18,15 +20,8 @@ class StoryDetailScreen extends ConsumerStatefulWidget {
 
 class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
   @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(storyRepositoryProvider).incrementView(widget.storyId);
-    });
-  }
-  @override
   Widget build(BuildContext context) {
-    final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
+    final storyDetailAsync = ref.watch(storyDetailViewModelProvider);
     final chaptersAsync = ref.watch(chapterListProvider(widget.storyId));
 
     return Scaffold(
@@ -66,7 +61,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              storyDetailAsync.value?.coverLink ?? "https://lh7-rt.googleusercontent.com/docsz/AD_4nXd-JmBSGuLeZSkBuj38razGDVv45PcjJ6KhweCCwwHv1HfqwAwW8lY8HEba9IzJK0B_Z_9E8vcAiV02YF4jLO9eGgA6f-zqqOsCr8FtmhgCreaR5SSd9FxkuK2fr0Vdj6J_6r1tNHNmYACFiWkAs4EO1KHK?key=tE_qip6BHPL4g00JXL_X6Q",
+                              storyDetailAsync.story.value?.coverLink ?? "https://www.shutterstock.com/shutterstock/videos/1039407446/thumb/1.jpg?ip=x480",
                               width: 150,
                               height: 150,
                               fit: BoxFit.cover,
@@ -90,9 +85,13 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                         ),
                         const SizedBox(height: 18),
                         Center(
-                          child: Text(
-                            storyDetailAsync.value?.title ?? 'Loading...',
-                            style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 48, right: 48),
+                            child: Text(
+                              storyDetailAsync.story.value?.title ?? 'Loading...',
+                              style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -122,7 +121,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
           },
           body: TabBarView(
             children: [
-              _buildAboutContent(storyDetailAsync.value?.description ?? 'Loading...'),
+              _buildAboutContent(storyDetailAsync.story.value?.description ?? 'Loading...'),
               _buildAboutChapter(chaptersAsync),
               const Center(child: Text("Reviews", style: TextStyle(color: Colors.white))),
             ],
@@ -133,8 +132,8 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
   }
 
   Widget _buildStatsSection() {
-    final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
-    final int favCount = storyDetailAsync.value?.favoriteCount ?? 0;
+    final storyDetailAsync = ref.watch(storyDetailViewModelProvider);
+    final int favCount = storyDetailAsync.story.value?.favoriteCount ?? 0;
 
     return SizedBox(
       width: double.infinity,
@@ -146,10 +145,12 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
             '$favCount',
             icon: 'assets/icons/ic_heart.svg',
             iconColor: favCount > 0 ? Colors.redAccent : const Color(0xFF94A3B8),
-            onTap: () => ref.read(storyDetailViewModelProvider.notifier).toggleFavorite(widget.storyId),
+            onTap: () {
+              ref.read(storyDetailViewModelProvider.notifier).toggleFavorite(widget.storyId);
+            },
           ),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
-          _buildStatItem('VIEWS', '${storyDetailAsync.value?.viewCount ?? 0}', icon: 'assets/icons/ic_eye.svg'),
+          _buildStatItem('VIEWS', '${storyDetailAsync.story.value?.viewCount ?? 0}', icon: 'assets/icons/ic_eye.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
           _buildStatItem('STATUS', 'Completed', color: const Color(0xFF22C55E)),
         ],
@@ -217,6 +218,9 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
   Widget _buildAboutChapter(AsyncValue<List<ChapterSummary>> chaptersAsync) {
     return chaptersAsync.when(
       data: (chapterList) {
+        final storyDetailAsync = ref.watch(storyDetailViewModelProvider);
+        final story = storyDetailAsync.story.value;
+
         if (chapterList.isEmpty) {
           return const Center(child: Text("Truyện chưa có chương nào", style: TextStyle(color: Colors.white70)));
         }
@@ -235,15 +239,15 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12)
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12)
                         ),
                         child: Center(
                           child: Text(
                             chapter.orderNum.toString(),
                             style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontSize: 18,
-                                color: Theme.of(context).colorScheme.primary
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.primary
                             ),
                           ),
                         )
@@ -267,8 +271,27 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                       ),
                     ),
                     IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.download, color: Colors.grey)
+                      onPressed: () async {
+                        if (story == null) return;
+                        final response = await ref.read(storyRepositoryProvider)
+                            .getChapterByNumber(widget.storyId, chapter.orderNum);
+
+                        if (response.data != null) {
+                          final chapterDetail = response.data!;
+
+                          await ref.read(offlineViewModelProvider.notifier)
+                              .downloadChapter(story, chapterDetail);
+
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Đã tải: ${chapterDetail.title}')),
+                            );
+                          }
+                        }
+                      },
+                      icon: ref.watch(isDownloadedProvider(chapter.id))
+                          ? const Icon(Icons.cloud_done, color: Colors.green)
+                          : const Icon(Icons.download, color: Colors.grey),
                     ),
                   ],
                 ),
