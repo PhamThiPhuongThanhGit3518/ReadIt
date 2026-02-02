@@ -33,7 +33,7 @@ class StoryRepository {
     return response.data ?? [];
   }
 
-  Future<List<StorySummary>> getProgressStories() async {
+  Future<List<HistoryItem>> getProgressStories() async {
     final response = await apiService.getProgressStories();
     return response.data ?? [];
   }
@@ -57,7 +57,6 @@ class StoryRepository {
     }
   }
 
-
   Future<StoryResponse> createStory({
     required String title,
     required String description,
@@ -71,10 +70,6 @@ class StoryRepository {
       );
     }
     return apiService.createStory(title, description, multipartFile);
-  }
-
-  Future<CommonResponse> incrementView(int storyId) async {
-    return apiService.incrementView(storyId);
   }
 
   Future<FavoriteResponse> toggleFavorite(int storyId) async {
