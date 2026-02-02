@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:read_it/services/new_viewmodels/story_list_viewmodel.dart';
+import 'package:read_it/services/viewmodels/story_list_viewmodel.dart';
 
 import '../../models/dto/api_dto.dart';
 import '../../providers/api_providers.dart';

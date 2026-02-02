@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:read_it/services/new_viewmodels/story_list_viewmodel.dart';
+import 'package:read_it/services/viewmodels/story_list_viewmodel.dart';
 
 import '../../providers/api_providers.dart';
 import 'refresh_ui/library_viewmodel.dart';
