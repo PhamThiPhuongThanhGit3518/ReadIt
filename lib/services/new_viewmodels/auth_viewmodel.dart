@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:read_it/models/dto/api_dto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../providers/api_providers.dart';
+import '../../providers/api_providers.dart';
 
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AsyncValue<UserDto?>>((ref) {
   return AuthViewModel(ref);
