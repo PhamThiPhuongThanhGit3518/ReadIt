@@ -124,7 +124,9 @@ class StoryListResponse {
 class StorySummary {
   final int id;
   final String title;
+  @JsonKey(name: 'viewCount')
   final int? viewCount;
+  @JsonKey(name: 'chapterCount')
   final int? chapterCount;
   final String? coverImagePath;
 
@@ -324,4 +326,45 @@ class CommonResponse {
 
   factory CommonResponse.fromJson(Map<String, dynamic> json) =>
       _$CommonResponseFromJson(json);
+}
+
+@JsonSerializable()
+class StoryProgressResponse {
+  final bool success;
+  final List<HistoryItem>? data;
+
+  StoryProgressResponse({required this.success, this.data});
+
+  factory StoryProgressResponse.fromJson(Map<String, dynamic> json) =>
+      _$StoryProgressResponseFromJson(json);
+}
+
+@JsonSerializable()
+class HistoryItem {
+  final int storyId;
+  final String storyTitle;
+  final String? coverImagePath;
+  final String? authorName;
+  final int? lastChapterId;
+  final int? lastChapterOrder;
+  final String? lastChapterTitle;
+  final String? lastReadAt;
+  final int? totalChapters;
+  final String? coverLink;
+
+  HistoryItem({
+    required this.storyId,
+    required this.storyTitle,
+    this.coverImagePath,
+    this.authorName,
+    this.lastChapterId,
+    this.lastChapterOrder,
+    this.lastChapterTitle,
+    this.lastReadAt,
+    this.totalChapters,
+    this.coverLink,
+  });
+
+  factory HistoryItem.fromJson(Map<String, dynamic> json) =>
+      _$HistoryItemFromJson(json);
 }

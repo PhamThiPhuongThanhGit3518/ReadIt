@@ -306,3 +306,43 @@ CommonResponse _$CommonResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CommonResponseToJson(CommonResponse instance) =>
     <String, dynamic>{'success': instance.success, 'message': instance.message};
+
+StoryProgressResponse _$StoryProgressResponseFromJson(
+  Map<String, dynamic> json,
+) => StoryProgressResponse(
+  success: json['success'] as bool,
+  data: (json['data'] as List<dynamic>?)
+      ?.map((e) => HistoryItem.fromJson(e as Map<String, dynamic>))
+      .toList(),
+);
+
+Map<String, dynamic> _$StoryProgressResponseToJson(
+  StoryProgressResponse instance,
+) => <String, dynamic>{'success': instance.success, 'data': instance.data};
+
+HistoryItem _$HistoryItemFromJson(Map<String, dynamic> json) => HistoryItem(
+  storyId: (json['storyId'] as num).toInt(),
+  storyTitle: json['storyTitle'] as String,
+  coverImagePath: json['coverImagePath'] as String?,
+  authorName: json['authorName'] as String?,
+  lastChapterId: (json['lastChapterId'] as num?)?.toInt(),
+  lastChapterOrder: (json['lastChapterOrder'] as num?)?.toInt(),
+  lastChapterTitle: json['lastChapterTitle'] as String?,
+  lastReadAt: json['lastReadAt'] as String?,
+  totalChapters: (json['totalChapters'] as num?)?.toInt(),
+  coverLink: json['coverLink'] as String?,
+);
+
+Map<String, dynamic> _$HistoryItemToJson(HistoryItem instance) =>
+    <String, dynamic>{
+      'storyId': instance.storyId,
+      'storyTitle': instance.storyTitle,
+      'coverImagePath': instance.coverImagePath,
+      'authorName': instance.authorName,
+      'lastChapterId': instance.lastChapterId,
+      'lastChapterOrder': instance.lastChapterOrder,
+      'lastChapterTitle': instance.lastChapterTitle,
+      'lastReadAt': instance.lastReadAt,
+      'totalChapters': instance.totalChapters,
+      'coverLink': instance.coverLink,
+    };
