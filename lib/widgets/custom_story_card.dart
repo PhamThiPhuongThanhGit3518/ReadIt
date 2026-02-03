@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/dto/api_dto.dart';
+import '../utils/date_formatter.dart';
 
 class CustomStoryCard extends StatelessWidget {
   final StorySummary story;
@@ -47,7 +48,7 @@ class CustomStoryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    story.title,
+                    story.title ?? "Loading...",
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -57,8 +58,8 @@ class CustomStoryCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'M. Mystery',
+                  Text(
+                    story.authorName ?? "Loading...",
                     style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
@@ -73,9 +74,9 @@ class CustomStoryCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        '• 2h ago',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      Text(
+                        DateFormatter.toRelativeTime(story.lastUpdateAt),
+                        style: const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
                   ),
