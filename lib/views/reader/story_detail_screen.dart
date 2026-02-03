@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:read_it/services/viewmodels/chapter_viewmodel.dart';
-import 'package:read_it/services/viewmodels/story_detail_viewmodel.dart';
 import 'package:read_it/utils/date_formatter.dart';
 import '../../models/dto/api_dto.dart';
 import '../../providers/api_providers.dart';
-import '../../services/viewmodels/offline/offline_viewmodel.dart';
+import '../../viewmodels/chapters/chapter_list_viewmodel.dart';
+import '../../viewmodels/offline/offline_viewmodel.dart';
+import '../../viewmodels/refresh_ui/library_viewmodel.dart';
+import '../../viewmodels/stories/story_detail_viewmodel.dart';
 
 class StoryDetailScreen extends ConsumerStatefulWidget {
   final int storyId;
@@ -21,7 +22,7 @@ class StoryDetailScreen extends ConsumerStatefulWidget {
 class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    final storyDetailAsync = ref.watch(storyDetailViewModelProvider);
+    final storyDetailAsync = ref.watch(storyDetailProvider(widget.storyId));
     final chaptersAsync = ref.watch(chapterListProvider(widget.storyId));
 
     return Scaffold(
@@ -61,7 +62,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              storyDetailAsync.story.value?.coverLink ?? "https://www.shutterstock.com/shutterstock/videos/1039407446/thumb/1.jpg?ip=x480",
+                              storyDetailAsync.value?.coverLink ?? "https://www.shutterstock.com/shutterstock/videos/1039407446/thumb/1.jpg?ip=x480",
                               width: 150,
                               height: 150,
                               fit: BoxFit.cover,
@@ -88,7 +89,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           child: Padding(
                             padding: const EdgeInsets.only(left: 48, right: 48),
                             child: Text(
-                              storyDetailAsync.story.value?.title ?? 'Loading...',
+                              storyDetailAsync.value?.title ?? 'Loading...',
                               style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 24),
                               textAlign: TextAlign.center,
                             ),
@@ -96,11 +97,11 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Jane Doe',
+                          storyDetailAsync.value?.authorName ?? "Loading...",
                           style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Theme.of(context).colorScheme.primary),
                         ),
                         const SizedBox(height: 12),
-                        _buildStatsSection(),
+                        _buildStatsSection(widget.storyId),
                       ],
                     ),
                   ),
@@ -121,7 +122,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
           },
           body: TabBarView(
             children: [
-              _buildAboutContent(storyDetailAsync.story.value?.description ?? 'Loading...'),
+              _buildAboutContent(storyDetailAsync.value?.description ?? 'Loading...'),
               _buildAboutChapter(chaptersAsync),
               const Center(child: Text("Reviews", style: TextStyle(color: Colors.white))),
             ],
@@ -131,9 +132,13 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
     );
   }
 
-  Widget _buildStatsSection() {
-    final storyDetailAsync = ref.watch(storyDetailViewModelProvider);
-    final int favCount = storyDetailAsync.story.value?.favoriteCount ?? 0;
+  Widget _buildStatsSection(int storyId) {
+    final storyDetailAsync = ref.watch(storyDetailProvider(storyId));
+    final libraryState = ref.watch(libraryViewModelProvider);
+
+    final favorites = libraryState.favorites.value ?? [];
+    final bool isLiked = favorites.any((s) => s.id == widget.storyId);
+    final int favCount = storyDetailAsync.value?.favoriteCount ?? 0;
 
     return SizedBox(
       width: double.infinity,
@@ -144,13 +149,13 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
             'LIKES',
             '$favCount',
             icon: 'assets/icons/ic_heart.svg',
-            iconColor: favCount > 0 ? Colors.redAccent : const Color(0xFF94A3B8),
+            iconColor: isLiked ? Colors.redAccent : const Color(0xFF94A3B8),
             onTap: () {
               ref.read(storyDetailViewModelProvider.notifier).toggleFavorite(widget.storyId);
             },
           ),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
-          _buildStatItem('VIEWS', '${storyDetailAsync.story.value?.viewCount ?? 0}', icon: 'assets/icons/ic_eye.svg'),
+          _buildStatItem('VIEWS', '${storyDetailAsync.value?.viewCount ?? 0}', icon: 'assets/icons/ic_eye.svg'),
           const VerticalDivider(color: Color(0xFF1D283A), thickness: 1, indent: 10, endIndent: 10),
           _buildStatItem('STATUS', 'Completed', color: const Color(0xFF22C55E)),
         ],
@@ -258,7 +263,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            chapter.title,
+                            chapter.title ?? "Loading...",
                             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -274,7 +279,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                       onPressed: () async {
                         if (story == null) return;
                         final response = await ref.read(storyRepositoryProvider)
-                            .getChapterByNumber(widget.storyId, chapter.orderNum);
+                            .getChapterByNumber(widget.storyId, chapter.orderNum ?? -1);
 
                         if (response.data != null) {
                           final chapterDetail = response.data!;
@@ -289,7 +294,7 @@ class _StoryDetailScreenState extends ConsumerState<StoryDetailScreen> {
                           }
                         }
                       },
-                      icon: ref.watch(isDownloadedProvider(chapter.id))
+                      icon: ref.watch(isDownloadedProvider(chapter.id ?? -1))
                           ? const Icon(Icons.cloud_done, color: Colors.green)
                           : const Icon(Icons.download, color: Colors.grey),
                     ),
