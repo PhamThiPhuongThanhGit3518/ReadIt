@@ -5,20 +5,21 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:read_it/services/viewmodels/chapter_viewmodel.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
 
 import '../../services/file_picker_service.dart';
-import '../../services/viewmodels/refresh_ui/library_viewmodel.dart';
+import '../../viewmodels/chapters/chapter_detail_viewmodel.dart';
+import '../../viewmodels/chapters/chapter_form_viewmodel.dart';
+import '../../viewmodels/stories/story_detail_viewmodel.dart';
 
 class UploadChapterScreen extends ConsumerStatefulWidget {
   final int storyId;
   final int chapterId;
+  final int chapterNum;
 
-  const UploadChapterScreen({super.key, required this.storyId, required this.chapterId});
+  const UploadChapterScreen({super.key, required this.storyId, required this.chapterId, required this.chapterNum});
 
   @override
   ConsumerState<UploadChapterScreen> createState() => _UploadChapterScreenState();
@@ -32,38 +33,32 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
   final TextEditingController chapterNumberController = TextEditingController();
   final TextEditingController chapterTitleController = TextEditingController();
 
-  final libraryViewModelProvider = StateNotifierProvider<LibraryViewModel, LibraryState>((ref) {
-    return LibraryViewModel(ref);
-  });
-
-
   @override
   void initState() {
     super.initState();
+
     if (widget.chapterId != -1) {
-      Future.microtask(() async {
-        final extraData = GoRouterState.of(context).extra as Map<String, dynamic>;
-        final int chapterNum = extraData['chapterNum'];
-        final chapterAsync = ref.watch(chapterByOrderProvider((
-          storyId: widget.storyId,
-          orderNum: chapterNum,
-        )));
-        if (chapterAsync != null) {
-          setState(() {
-            chapterNumberController.text = chapterAsync.value?.orderNum.toString() ?? '';
-            chapterTitleController.text = chapterAsync.value?.title ?? '';
-            _selectedFilePath = chapterAsync.value?.content;
-          });
-        }
-      });
+      _loadOldChapter();
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
-    bool isEdit = widget.chapterId != -1;
-    final uploadChapterState = ref.watch(uploadChapterProvider);
+    ref.listen<ChapterFormState>(
+      chapterFormViewModelProvider,
+          (previous, next) {
+        if (!mounted) return;
 
+        if (next.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(next.error!)),
+          );
+        }
+      },
+    );
+    final story = ref.watch(storyDetailProvider(widget.storyId));
+    bool isEdit = widget.chapterId != -1;
     return Scaffold(
       body: SafeArea(child: Padding(
         padding: EdgeInsets.all(12),
@@ -81,7 +76,8 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
                       colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                     ),
                   ),
-                  Text( isEdit ? 'Edit Chapter' : 'Upload Chapter',
+                  Text(
+                    isEdit ? 'Update Chapter' : 'Publish Chapter',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -96,7 +92,7 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
               ),
               const SizedBox(height: 12,),
               Text(
-                'Story Name',
+                story.value?.title ?? "Loading...",
                 style: Theme.of(context).textTheme.displayLarge,
               ),
               const SizedBox(height: 8,),
@@ -109,7 +105,8 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
                 label: 'Chapter Number',
                 hint: 'Enter chapter number',
                 isPassword: false,
-                controller: chapterNumberController
+                controller: chapterNumberController,
+                enable: !isEdit,
               ),
               const SizedBox(height: 12,),
               CustomTextField(
@@ -179,36 +176,39 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
               SizedBox(
                 height: 56,
                 child: FilledButton(
-                    onPressed: (uploadChapterState.isLoading || _selectedFilePath == null)
-                        ? null
-                        : () async {
-                      try {
+                    onPressed: () async {
+                      if (_selectedFilePath == null && !isEdit) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Vui lòng chọn file nội dung!')),
+                        );
+                        return;
+                      }
+
+                      String content = '';
+                      if (_selectedFilePath != null &&
+                          !_selectedFilePath!.startsWith('Current content')) {
                         final file = File(_selectedFilePath!);
                         final bytes = await file.readAsBytes();
-                        String content = utf8.decode(bytes, allowMalformed: true);
-          
-                        await ref.read(uploadChapterProvider.notifier).uploadChapter(
-                          storyId: widget.storyId,
-                          title: chapterTitleController.text,
-                          content: content,
-                          orderNum: int.tryParse(chapterNumberController.text) ?? 1,
-                        );
+                        content = utf8.decode(bytes, allowMalformed: true);
+                      }
 
-                        ref.read(libraryViewModelProvider.notifier).onChapterUploaded(widget.storyId);
-          
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Đã đăng chương thành công!')),
-                          );
-                          context.go('/library');
-                        }
-                      } catch (e) {
+                      await ref.read(chapterFormViewModelProvider.notifier).submitChapter(
+                        storyId: widget.storyId,
+                        title: chapterTitleController.text,
+                        content: content,
+                        orderNum: int.tryParse(chapterNumberController.text) ?? 1,
+                        isEdit: isEdit,
+                      );
+                      if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Lỗi tải chương: $e')),
+                          const SnackBar(content: Text('Đã xử lý chương thành công!')),
                         );
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (mounted) context.pop();
+                        });
                       }
                     },
-                  style: FilledButton.styleFrom(
+                    style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)
                     )
@@ -233,5 +233,37 @@ class _UploadChapterScreenState extends ConsumerState<UploadChapterScreen> {
         ),
       ),)
     );
+  }
+
+  @override
+  void dispose() {
+    chapterNumberController.dispose();
+    chapterTitleController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadOldChapter() async {
+    final int? chapterNum = widget.chapterNum;
+
+    if (chapterNum == null) {
+      print('Error: chapterNum is null');
+      return;
+    }
+
+    print('Loading Chapter with Number: $chapterNum');
+
+    final chapter = await ref.read(
+      chapterByOrderProvider(
+        (storyId: widget.storyId, orderNum: chapterNum),
+      ).future,
+    );
+
+    if (!mounted || chapter == null) return;
+
+    setState(() {
+      chapterNumberController.text = chapter.orderNum.toString();
+      chapterTitleController.text = chapter.title;
+      _selectedFilePath = "Current content loaded (Tap to change)";
+    });
   }
 }

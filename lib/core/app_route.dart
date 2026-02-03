@@ -48,9 +48,12 @@ class AppRoute {
       ),
       GoRoute(path: '/upload_chapter/:storyId/:chapterId',
         builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final chapterNum = extra?['chapterNum'] as int?;
           return UploadChapterScreen(
             storyId: int.parse(state.pathParameters['storyId']!),
             chapterId: int.parse(state.pathParameters['chapterId']!),
+            chapterNum: chapterNum ?? -1,
           );
         },
       ),
