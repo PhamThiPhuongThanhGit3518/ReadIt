@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-import '../../models/dto/api_dto.dart';
-import '../../providers/api_providers.dart';
-import 'refresh_ui/library_viewmodel.dart';
+import '../../../models/dto/api_dto.dart';
+import '../../../providers/api_providers.dart';
+import '../refresh_ui/library_viewmodel.dart';
 
 final storyDetailViewModelProvider = StateNotifierProvider<StoryDetailViewModel, StoryDetailState>((ref) {
   return StoryDetailViewModel(ref);
@@ -52,9 +52,20 @@ class StoryDetailViewModel extends StateNotifier<StoryDetailState> {
     try {
       await ref.read(storyRepositoryProvider).toggleFavorite(storyId);
       ref.read(libraryViewModelProvider.notifier).refreshLibrary();
+      ref.invalidate(storyDetailProvider);
       await loadStoryDetail(storyId);
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
 }
+
+final storyDetailProvider = FutureProvider.family.autoDispose<StoryDetail?, int>(
+      (ref, storyId) async {
+    try {
+      return await ref.watch(storyRepositoryProvider).getStoryDetail(storyId);
+    } catch (e, st) {
+      throw Exception('Lỗi tải chi tiết truyện: $e');
+    }
+  },
+);

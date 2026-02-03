@@ -1,34 +1,36 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:read_it/services/viewmodels/story_list_viewmodel.dart';
 
 import '../../providers/api_providers.dart';
-import 'refresh_ui/library_viewmodel.dart';
+import '../refresh_ui/library_viewmodel.dart';
+import '../stories/story_detail_viewmodel.dart';
+import '../stories/story_list_viewmodel.dart';
+import 'chapter_list_viewmodel.dart';
 
-final deleteChapterViewModelProvider = StateNotifierProvider<DeleteChapterViewModel, DeleteChapterState>((ref) {
-  return DeleteChapterViewModel(ref);
-});
+final deleteChapterProvider = StateNotifierProvider<DeleteChapterViewModel, DeleteChapterState>(
+      (ref) => DeleteChapterViewModel(ref),
+);
 
 class DeleteChapterState {
-  final AsyncValue<void> deleteStatus;
   final bool isLoading;
   final String? error;
+  final bool success;
 
   DeleteChapterState({
-    this.deleteStatus = const AsyncData(null),
     this.isLoading = false,
     this.error,
+    this.success = false,
   });
 
   DeleteChapterState copyWith({
-    AsyncValue<void>? deleteStatus,
     bool? isLoading,
     String? error,
+    bool? success,
   }) {
     return DeleteChapterState(
-      deleteStatus: deleteStatus ?? this.deleteStatus,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      success: success ?? this.success,
     );
   }
 }
@@ -38,16 +40,21 @@ class DeleteChapterViewModel extends StateNotifier<DeleteChapterState> {
 
   DeleteChapterViewModel(this.ref) : super(DeleteChapterState());
 
-  Future<void> deleteChapter(int chapterId, int storyId) async {
-    state = state.copyWith(isLoading: true, error: null);
+  Future<void> deleteChapter({
+    required int chapterId,
+    required int storyId,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null, success: false);
     try {
       await ref.read(storyRepositoryProvider).deleteChapter(chapterId);
-      state = state.copyWith(deleteStatus: const AsyncData(null), isLoading: false);
-      // Refresh library để update My Stories (chapterCount)
+      ref.invalidate(chapterListProvider(storyId));
+      ref.invalidate(storyDetailProvider(storyId));
       ref.read(libraryViewModelProvider.notifier).refreshLibrary();
       ref.read(storyListViewModelProvider.notifier).refreshAll();
+
+      state = state.copyWith(isLoading: false, success: true);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
+      state = state.copyWith(isLoading: false, error: e.toString(), success: false);
     }
   }
 }

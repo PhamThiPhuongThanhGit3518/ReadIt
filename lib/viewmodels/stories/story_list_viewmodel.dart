@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-import '../../models/dto/api_dto.dart';
-import '../../providers/api_providers.dart';
+import '../../../models/dto/api_dto.dart';
+import '../../../providers/api_providers.dart';
 
 final storyListViewModelProvider = StateNotifierProvider<StoryListViewModel, StoryListState>((ref) {
   return StoryListViewModel(ref);

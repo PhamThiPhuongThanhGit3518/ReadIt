@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:read_it/models/dto/api_dto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../providers/api_providers.dart';
+import '../../../providers/api_providers.dart';
 
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AsyncValue<UserDto?>>((ref) {
   return AuthViewModel(ref);
@@ -21,15 +21,21 @@ class AuthViewModel extends StateNotifier<AsyncValue<UserDto?>> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
+      final userJson = prefs.getString('user_data');
 
       if (token != null && token.isNotEmpty) {
+        if (userJson != null) {
+          final cachedUser = UserDto.fromJson(jsonDecode(userJson));
+          state = AsyncData(cachedUser);
+        }
         final user = await ref.read(authRepositoryProvider).getCurrentUser();
         state = AsyncData(user);
+        await prefs.setString('user_data', jsonEncode(user.toJson()));
       } else {
         state = const AsyncData(null);
       }
     } catch (e, st) {
-      state = const AsyncData(null);
+      state = AsyncValue.error(e, st);
     }
   }
 
@@ -38,6 +44,8 @@ class AuthViewModel extends StateNotifier<AsyncValue<UserDto?>> {
     try {
       final UserDto user = await ref.read(authRepositoryProvider).register(username, email, password, role);
       state = AsyncData(user);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_data', jsonEncode(user.toJson()));
     } catch (e, st) {
       state = AsyncError(e, st);
       rethrow;
@@ -48,8 +56,13 @@ class AuthViewModel extends StateNotifier<AsyncValue<UserDto?>> {
     state = const AsyncLoading();
     try {
       final response = await ref.read(authRepositoryProvider).login(email, password);
-      if (response.user != null) {
+      if (response.user != null && response.token != null) {
         state = AsyncData(response.user);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', response.token!);
+        await prefs.setString('user_data', jsonEncode(response.user!.toJson()));
+      } else {
+        state = const AsyncData(null);
       }
     } catch (e, st) {
       state = AsyncError(e, st);

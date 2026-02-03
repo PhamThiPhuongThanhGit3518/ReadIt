@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:read_it/providers/api_providers.dart';
-import 'package:read_it/services/viewmodels/auth_viewmodel.dart';
 
 import '../../../models/dto/api_dto.dart';
+import '../../providers/auth_providers.dart';
+import '../chapters/chapter_list_viewmodel.dart';
+import '../stories/story_detail_viewmodel.dart';
+import '../stories/story_list_viewmodel.dart';
 
 final libraryViewModelProvider = StateNotifierProvider<LibraryViewModel, LibraryState>((ref) {
   return LibraryViewModel(ref);
@@ -42,6 +45,11 @@ class LibraryViewModel extends StateNotifier<LibraryState> {
 
   LibraryViewModel(this.ref) : super(LibraryState()) {
     _loadData();
+    ref.listen(currentUserProvider, (previous, next) {
+      if (next != previous) {
+        _loadData();
+      }
+    });
   }
 
   Future<void> _loadData() async {
@@ -88,9 +96,12 @@ class LibraryViewModel extends StateNotifier<LibraryState> {
     final userId = ref.read(currentUserProvider).value?.id ?? -1;
     if (userId <= 0) return;
 
+    state = state.copyWith(myStories: const AsyncLoading());
+
     try {
-      final myStories = await ref.read(storyRepositoryProvider).getStoriesByUser(userId);
-      state = state.copyWith(myStories: AsyncData(myStories));
+      final newStories = await ref.read(storyRepositoryProvider).getStoriesByUser(userId);
+      final updatedList = List<StorySummary>.from(newStories);
+      state = state.copyWith(myStories: AsyncData(updatedList));
     } catch (e, st) {
       state = state.copyWith(myStories: AsyncError(e, st));
     }
@@ -133,17 +144,22 @@ class LibraryViewModel extends StateNotifier<LibraryState> {
   }
 
   Future<void> onChapterUploaded(int storyId) async {
+    ref.invalidate(storyDetailProvider(storyId));
+    ref.invalidate(chapterListProvider(storyId));
     await refreshMyStories();
     await refreshLibrary();
+    ref.read(storyListViewModelProvider.notifier).refreshAll();
   }
 
   Future<void> onStoryDeleted(int storyId) async {
     await refreshMyStories();
     await refreshLibrary();
+    ref.read(storyListViewModelProvider.notifier).refreshAll();
   }
 
   Future<void> onChapterDeleted(int storyId) async {
     await refreshMyStories();
     await refreshLibrary();
+    ref.read(storyListViewModelProvider.notifier).refreshAll();
   }
 }

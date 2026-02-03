@@ -20,9 +20,9 @@ class OfflineViewModel extends StateNotifier<AsyncValue<void>> {
       final isar = ref.read(isarProvider);
 
       final offlineItem = OfflineChapter(
-        storyId: story.id,
+        storyId: story.id ?? -1,
         chapterId: chapter.id,
-        storyName: story.title,
+        storyName: story.title ?? "Loading...",
         chapterTitle: chapter.title,
         orderNum: chapter.orderNum,
         content: chapter.content,
