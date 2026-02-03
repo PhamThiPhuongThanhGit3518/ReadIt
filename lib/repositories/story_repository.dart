@@ -57,9 +57,11 @@ class StoryRepository {
     }
   }
 
+
   Future<StoryResponse> createStory({
     required String title,
     required String description,
+    required List<String> genres,
     File? posterFile,
   }) async {
     MultipartFile? multipartFile;
@@ -69,7 +71,7 @@ class StoryRepository {
         filename: posterFile.path.split('/').last,
       );
     }
-    return apiService.createStory(title, description, multipartFile);
+    return apiService.createStory(title, description, genres, multipartFile);
   }
 
   Future<FavoriteResponse> toggleFavorite(int storyId) async {
@@ -122,4 +124,59 @@ class StoryRepository {
   Future<CommonResponse> deleteChapterByNumber(int storyId, int orderNum) async {
     return apiService.deleteChapterByNumber(storyId, orderNum);
   }
+
+  Future<StoryResponse> updateStory({
+    required int storyId,
+    String? title,
+    String? description,
+    File? posterFile,
+  }) async {
+    MultipartFile? multipartFile;
+    if (posterFile != null) {
+      multipartFile = await MultipartFile.fromFile(
+        posterFile.path,
+        filename: posterFile.path.split('/').last,
+      );
+    }
+    return apiService.updateStory(storyId, title, description, multipartFile);
+  }
+
+  Future<CommonResponse> updateChapterByNumber({
+    required int storyId,
+    required int orderNum,
+    String? title,
+    String? content,
+  }) async {
+    MultipartFile? file;
+    if (content != null) {
+      final contentBytes = utf8.encode(content);
+      file = MultipartFile.fromBytes(
+        contentBytes,
+        filename: 'content_updated.txt',
+      );
+    }
+    return apiService.updateChapterByNumber(
+      storyId,
+      orderNum,
+      title,
+      file,
+    );
+  }
+
+  Future<CommonResponse> updateChapter({
+    required int chapterId,
+    String? title,
+    String? content,
+  }) async {
+    MultipartFile? file;
+    if (content != null) {
+      final contentBytes = utf8.encode(content);
+      file = MultipartFile.fromBytes(
+        contentBytes,
+        filename: 'content_updated.txt',
+      );
+    }
+    return apiService.updateChapter(chapterId, title, file);
+  }
+
 }

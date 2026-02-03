@@ -40,6 +40,7 @@ abstract class ApiService {
   Future<StoryResponse> createStory(
       @Part() String title,
       @Part() String description,
+      @Part() List<String> genres,
       @Part(name: "poster") MultipartFile? posterFile,
       );
 
@@ -82,7 +83,7 @@ abstract class ApiService {
   @GET("/stories/personalized/chapters/:chapterId")
   Future<ChapterContentResponse> getChapterContent(@Path("chapterId") int chapterId);
 
-  @GET("/stories/personalized/{storyId}/chapters/{orderNum}")
+    @GET("/stories/personalized/{storyId}/chapters/{orderNum}")
   Future<ChapterContentResponse> getChapterByNumber(
       @Path("storyId") int storyId,
       @Path("orderNum") int orderNum,
@@ -96,4 +97,30 @@ abstract class ApiService {
 
   @DELETE('/stories/{storyId}/chapters/{orderNum}')
   Future<CommonResponse> deleteChapterByNumber(@Path("storyId") int storyId, @Path("orderNum") int orderNum);
+
+  @MultiPart()
+  @PATCH("/stories/{storyId}")
+  Future<StoryResponse> updateStory(
+      @Path("storyId") int storyId,
+      @Part() String? title,
+      @Part() String? description,
+      @Part(name: "poster") MultipartFile? posterFile,
+      );
+
+  @MultiPart()
+  @PATCH("/stories/{storyId}/chapters/{orderNum}")
+  Future<CommonResponse> updateChapterByNumber(
+      @Path("storyId") int storyId,
+      @Path("orderNum") int orderNum,
+      @Part(name: "title") String? title,
+      @Part(name: "chapterFile") MultipartFile? chapterFile,
+      );
+
+  @MultiPart()
+  @PATCH("/stories/chapters/{chapterId}")
+  Future<CommonResponse> updateChapter(
+      @Path("chapterId") int chapterId,
+      @Part(name: "chapterTitle") String? title,
+      @Part(name: "chapterFile") MultipartFile? chapterFile,
+      );
 }

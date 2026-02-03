@@ -221,6 +221,7 @@ class _ApiService implements ApiService {
   Future<StoryResponse> createStory(
     String title,
     String description,
+    List<String> genres,
     MultipartFile? posterFile,
   ) async {
     final _extra = <String, dynamic>{};
@@ -230,6 +231,9 @@ class _ApiService implements ApiService {
     final _data = FormData();
     _data.fields.add(MapEntry('title', title));
     _data.fields.add(MapEntry('description', description));
+    genres.forEach((i) {
+      _data.fields.add(MapEntry('genres', i));
+    });
     if (posterFile != null) {
       _data.files.add(MapEntry('poster', posterFile));
     }
@@ -333,33 +337,6 @@ class _ApiService implements ApiService {
     late StoryProgressResponse _value;
     try {
       _value = StoryProgressResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<CommonResponse> incrementView(int storyId) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<CommonResponse>(
-      Options(method: 'PATCH', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/stories/${storyId}/view',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late CommonResponse _value;
-    try {
-      _value = CommonResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -695,6 +672,140 @@ class _ApiService implements ApiService {
           .compose(
             _dio.options,
             '/stories/${storyId}/chapters/${orderNum}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late CommonResponse _value;
+    try {
+      _value = CommonResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<StoryResponse> updateStory(
+    int storyId,
+    String? title,
+    String? description,
+    MultipartFile? posterFile,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = FormData();
+    if (title != null) {
+      _data.fields.add(MapEntry('title', title));
+    }
+    if (description != null) {
+      _data.fields.add(MapEntry('description', description));
+    }
+    if (posterFile != null) {
+      _data.files.add(MapEntry('poster', posterFile));
+    }
+    final _options = _setStreamType<StoryResponse>(
+      Options(
+            method: 'PATCH',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            '/stories/${storyId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late StoryResponse _value;
+    try {
+      _value = StoryResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<CommonResponse> updateChapterByNumber(
+    int storyId,
+    int orderNum,
+    String? title,
+    MultipartFile? chapterFile,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = FormData();
+    if (title != null) {
+      _data.fields.add(MapEntry('title', title));
+    }
+    if (chapterFile != null) {
+      _data.files.add(MapEntry('chapterFile', chapterFile));
+    }
+    final _options = _setStreamType<CommonResponse>(
+      Options(
+            method: 'PATCH',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            '/stories/${storyId}/chapters/${orderNum}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late CommonResponse _value;
+    try {
+      _value = CommonResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<CommonResponse> updateChapter(
+    int chapterId,
+    String? title,
+    MultipartFile? chapterFile,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = FormData();
+    if (title != null) {
+      _data.fields.add(MapEntry('chapterTitle', title));
+    }
+    if (chapterFile != null) {
+      _data.files.add(MapEntry('chapterFile', chapterFile));
+    }
+    final _options = _setStreamType<CommonResponse>(
+      Options(
+            method: 'PATCH',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            '/stories/chapters/${chapterId}',
             queryParameters: queryParameters,
             data: _data,
           )
