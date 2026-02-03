@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:read_it/viewmodels/auth/auth_viewmodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/auth_providers.dart';
 
@@ -29,7 +30,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userAsync = ref.watch(currentUserProvider);
+    final userAsync = ref.watch(authViewModelProvider);
 
     return userAsync.when(
       data: (user) => Scaffold(
@@ -84,7 +85,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                 Center(
                   child: Text(
-                      user.username ?? "Đang tải...",
+                      user?.username ?? "Đang tải...",
                     style: Theme.of(context).textTheme.displayLarge,
                   ),
                 ),
