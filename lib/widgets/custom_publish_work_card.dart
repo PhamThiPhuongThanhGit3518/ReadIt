@@ -4,15 +4,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/dto/api_dto.dart';
 
-class CustomPublishWorkCard extends StatelessWidget {
+class CustomPublishWorkCard extends StatefulWidget {
   final StorySummary story;
   final VoidCallback onEditStory;
   final VoidCallback onDeleteStory;
   final VoidCallback onEditChapter;
 
-
   const CustomPublishWorkCard({super.key, required this.story, required this.onEditStory, required this.onDeleteStory, required this.onEditChapter});
 
+  @override
+  State<CustomPublishWorkCard> createState() => _CustomPublishWorkCardState();
+}
+
+class _CustomPublishWorkCardState extends State<CustomPublishWorkCard> {
   @override
   Widget build(BuildContext context) {
     double screenWith = MediaQuery.of(context).size.width;
@@ -32,8 +36,8 @@ class CustomPublishWorkCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  story.coverImagePath != null && story.coverImagePath!.isNotEmpty
-                      ? "https://api.phongdaynai.id.vn/assets/images/poster/stories/${story.coverImagePath}"
+                  widget.story.coverImagePath != null && widget.story.coverImagePath!.isNotEmpty
+                      ? "https://api.phongdaynai.id.vn/assets/images/poster/stories/${widget.story.coverImagePath}"
                       : "https://img.idesign.vn/2018/10/23/id-loading-1.gif",
                   width: screenWith * 0.17,
                   height: screenHeight * 0.13,
@@ -48,12 +52,12 @@ class CustomPublishWorkCard extends StatelessWidget {
                 children: [
                   const SizedBox(height: 8),
                   Text(
-                    story.title,
+                    widget.story.title ?? "Loading...",
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total Chapters: ${story.chapterCount}',
+                    'Total Chapters: ${widget.story.chapterCount}',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Colors.grey),
                   ),
                   Spacer(),
@@ -67,7 +71,7 @@ class CustomPublishWorkCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12)
                           )
                         ),
-                        onPressed: onEditStory,
+                        onPressed: widget.onEditStory,
                         child: Text(
                           textAlign: TextAlign.center,
                           'Edit\nStory',
@@ -81,7 +85,7 @@ class CustomPublishWorkCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12)
                               )
                           ),
-                          onPressed: onEditChapter,
+                          onPressed: widget.onEditChapter,
                           child: Text(
                             textAlign: TextAlign.center,
                             'Edit\nChapter',
@@ -95,7 +99,7 @@ class CustomPublishWorkCard extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12)
                               )
                           ),
-                          onPressed: onDeleteStory,
+                          onPressed: widget.onDeleteStory,
                           child: SvgPicture.asset(
                             'assets/icons/ic_trash.svg',
                             colorFilter: ColorFilter.mode(Color(0xFFEF4444), BlendMode.srcIn),
