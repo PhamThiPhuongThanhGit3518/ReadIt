@@ -95,7 +95,7 @@ class StoryResponse {
 
 @JsonSerializable()
 class StoryData {
-  final int storyId;
+  final int? storyId;
   final String? posterFilename;
   final String? posterLink;
 
@@ -122,20 +122,24 @@ class StoryListResponse {
 
 @JsonSerializable()
 class StorySummary {
-  final int id;
-  final String title;
+  final int? id;
+  final String? authorName;
+  final String? title;
   @JsonKey(name: 'viewCount')
   final int? viewCount;
   @JsonKey(name: 'chapterCount')
   final int? chapterCount;
   final String? coverImagePath;
+  final DateTime? lastUpdateAt;
 
   StorySummary({
     required this.id,
-    required this.title,
+    this.title,
     this.viewCount,
     this.chapterCount,
     this.coverImagePath,
+    required this.authorName,
+    this.lastUpdateAt,
   });
 
   factory StorySummary.fromJson(Map<String, dynamic> json) =>
@@ -155,24 +159,32 @@ class StoryInfoResponse {
 
 @JsonSerializable()
 class StoryDetail {
-  final int id;
-  final String title;
-  final String description;
-  final int chapterCount;
-  final int viewCount;
+  final int? id;
+  final String? title;
+  final String? authorName;
+  final String? description;
+  final int? chapterCount;
+  final int? viewCount;
   final int? favoriteCount;
   final String? coverLink;
+  final String? status;
   final DateTime? createdAt;
+  final DateTime? lastUpdateAt;
+  final List<String>? genres;
 
   StoryDetail({
     required this.id,
-    required this.title,
-    required this.description,
+    this.title,
+    this.authorName,
+    this.description,
     required this.chapterCount,
     required this.viewCount,
     required this.favoriteCount,
     this.coverLink,
+    this.genres,
+    this.status,
     this.createdAt,
+    this.lastUpdateAt,
   });
 
   factory StoryDetail.fromJson(Map<String, dynamic> json) =>
@@ -208,16 +220,16 @@ class ChapterListResponse {
 
 @JsonSerializable()
 class ChapterSummary {
-  final int id;
-  final int orderNum;
-  final String title;
+  final int? id;
+  final int? orderNum;
+  final String? title;
   @JsonKey(name: 'createdAt')
   final DateTime? createdAt;
 
   ChapterSummary({
-    required this.id,
-    required this.orderNum,
-    required this.title,
+    this.id,
+    this.orderNum,
+    this.title,
     this.createdAt,
   });
 
@@ -309,9 +321,9 @@ class UploadChaptersResponse {
 @JsonSerializable()
 class UploadedChapter {
   final int chapterId;
-  final String title;
+  final String? title;
 
-  UploadedChapter({required this.chapterId, required this.title});
+  UploadedChapter({required this.chapterId, this.title});
 
   factory UploadedChapter.fromJson(Map<String, dynamic> json) =>
       _$UploadedChapterFromJson(json);
@@ -341,7 +353,7 @@ class StoryProgressResponse {
 
 @JsonSerializable()
 class HistoryItem {
-  final int storyId;
+  final int? storyId;
   final String storyTitle;
   final String? coverImagePath;
   final String? authorName;

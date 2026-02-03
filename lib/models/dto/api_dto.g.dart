@@ -93,7 +93,7 @@ Map<String, dynamic> _$StoryResponseToJson(StoryResponse instance) =>
     <String, dynamic>{'success': instance.success, 'data': instance.data};
 
 StoryData _$StoryDataFromJson(Map<String, dynamic> json) => StoryData(
-  storyId: (json['storyId'] as num).toInt(),
+  storyId: (json['storyId'] as num?)?.toInt(),
   posterFilename: json['posterFilename'] as String?,
   posterLink: json['posterLink'] as String?,
 );
@@ -116,20 +116,26 @@ Map<String, dynamic> _$StoryListResponseToJson(StoryListResponse instance) =>
     <String, dynamic>{'success': instance.success, 'data': instance.data};
 
 StorySummary _$StorySummaryFromJson(Map<String, dynamic> json) => StorySummary(
-  id: (json['id'] as num).toInt(),
-  title: json['title'] as String,
+  id: (json['id'] as num?)?.toInt(),
+  title: json['title'] as String?,
   viewCount: (json['viewCount'] as num?)?.toInt(),
   chapterCount: (json['chapterCount'] as num?)?.toInt(),
   coverImagePath: json['coverImagePath'] as String?,
+  authorName: json['authorName'] as String?,
+  lastUpdateAt: json['lastUpdateAt'] == null
+      ? null
+      : DateTime.parse(json['lastUpdateAt'] as String),
 );
 
 Map<String, dynamic> _$StorySummaryToJson(StorySummary instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'authorName': instance.authorName,
       'title': instance.title,
       'viewCount': instance.viewCount,
       'chapterCount': instance.chapterCount,
       'coverImagePath': instance.coverImagePath,
+      'lastUpdateAt': instance.lastUpdateAt?.toIso8601String(),
     };
 
 StoryInfoResponse _$StoryInfoResponseFromJson(Map<String, dynamic> json) =>
@@ -144,28 +150,38 @@ Map<String, dynamic> _$StoryInfoResponseToJson(StoryInfoResponse instance) =>
     <String, dynamic>{'success': instance.success, 'data': instance.data};
 
 StoryDetail _$StoryDetailFromJson(Map<String, dynamic> json) => StoryDetail(
-  id: (json['id'] as num).toInt(),
-  title: json['title'] as String,
-  description: json['description'] as String,
-  chapterCount: (json['chapterCount'] as num).toInt(),
-  viewCount: (json['viewCount'] as num).toInt(),
+  id: (json['id'] as num?)?.toInt(),
+  title: json['title'] as String?,
+  authorName: json['authorName'] as String?,
+  description: json['description'] as String?,
+  chapterCount: (json['chapterCount'] as num?)?.toInt(),
+  viewCount: (json['viewCount'] as num?)?.toInt(),
   favoriteCount: (json['favoriteCount'] as num?)?.toInt(),
   coverLink: json['coverLink'] as String?,
+  genres: (json['genres'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  status: json['status'] as String?,
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
+  lastUpdateAt: json['lastUpdateAt'] == null
+      ? null
+      : DateTime.parse(json['lastUpdateAt'] as String),
 );
 
 Map<String, dynamic> _$StoryDetailToJson(StoryDetail instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
+      'authorName': instance.authorName,
       'description': instance.description,
       'chapterCount': instance.chapterCount,
       'viewCount': instance.viewCount,
       'favoriteCount': instance.favoriteCount,
       'coverLink': instance.coverLink,
+      'status': instance.status,
       'createdAt': instance.createdAt?.toIso8601String(),
+      'lastUpdateAt': instance.lastUpdateAt?.toIso8601String(),
+      'genres': instance.genres,
     };
 
 FavoriteResponse _$FavoriteResponseFromJson(Map<String, dynamic> json) =>
@@ -196,9 +212,9 @@ Map<String, dynamic> _$ChapterListResponseToJson(
 
 ChapterSummary _$ChapterSummaryFromJson(Map<String, dynamic> json) =>
     ChapterSummary(
-      id: (json['id'] as num).toInt(),
-      orderNum: (json['orderNum'] as num).toInt(),
-      title: json['title'] as String,
+      id: (json['id'] as num?)?.toInt(),
+      orderNum: (json['orderNum'] as num?)?.toInt(),
+      title: json['title'] as String?,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -292,7 +308,7 @@ Map<String, dynamic> _$UploadChaptersResponseToJson(
 UploadedChapter _$UploadedChapterFromJson(Map<String, dynamic> json) =>
     UploadedChapter(
       chapterId: (json['chapterId'] as num).toInt(),
-      title: json['title'] as String,
+      title: json['title'] as String?,
     );
 
 Map<String, dynamic> _$UploadedChapterToJson(UploadedChapter instance) =>
@@ -321,7 +337,7 @@ Map<String, dynamic> _$StoryProgressResponseToJson(
 ) => <String, dynamic>{'success': instance.success, 'data': instance.data};
 
 HistoryItem _$HistoryItemFromJson(Map<String, dynamic> json) => HistoryItem(
-  storyId: (json['storyId'] as num).toInt(),
+  storyId: (json['storyId'] as num?)?.toInt(),
   storyTitle: json['storyTitle'] as String,
   coverImagePath: json['coverImagePath'] as String?,
   authorName: json['authorName'] as String?,
