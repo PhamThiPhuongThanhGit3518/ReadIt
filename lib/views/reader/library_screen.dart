@@ -7,11 +7,11 @@ import 'package:read_it/widgets/custom_publish_work_card.dart';
 import 'package:read_it/widgets/custom_story_card.dart';
 import '../../database/models/offline_chapter.dart';
 import '../../models/dto/api_dto.dart';
-import '../../services/viewmodels/delete_story_viewmodel.dart';
-import '../../services/viewmodels/story_detail_viewmodel.dart';
-import '../../services/viewmodels/auth_viewmodel.dart';
-import '../../services/viewmodels/refresh_ui/library_viewmodel.dart';
-import '../../services/viewmodels/offline/offline_viewmodel.dart';
+import '../../viewmodels/auth/auth_viewmodel.dart';
+import '../../viewmodels/stories/delete_story_viewmodel.dart';
+import '../../viewmodels/offline/offline_viewmodel.dart';
+import '../../viewmodels/refresh_ui/library_viewmodel.dart';
+import '../../viewmodels/stories/story_detail_viewmodel.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
@@ -25,7 +25,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authViewModelProvider);
     final user = authState.asData?.value;
-    final libraryState = ref.watch(libraryViewModelProvider);
+    final libraryState = ref.watch(libraryViewModelProvider.select((state) => state));
     final offlineChapters = ref.watch(offlineChaptersProvider);
 
     final bool isAuthor = user?.role == 'author';
@@ -34,12 +34,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
         : ['Favourites', 'Offline', 'History'];
 
     return Scaffold(
-      floatingActionButton: isAuthor
-          ? FloatingActionButton(
-        onPressed: () => context.push('/create_story'),
-        child: const Icon(Icons.add),
-      )
-          : null,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -80,7 +74,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                         child: TabBarView(
                           children: isAuthor
                               ? [
-                            _buildMyStories(libraryState.myStories),
+                            _buildMyStories(),
                             _buildFavorites(libraryState.favorites),
                             _buildOffline(offlineChapters),
                           ]
@@ -102,10 +96,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     );
   }
 
-  Widget _buildMyStories(AsyncValue<List<StorySummary>> storyState) {
+  Widget _buildMyStories() {
     final userId = ref.watch(authViewModelProvider).asData?.value?.id ?? -1;
-
-    return storyState.when(
+    final myStoriesAsync = ref.watch(libraryViewModelProvider.select((s) => s.myStories));
+    return myStoriesAsync.when(
       data: (stories) {
         return Column(
           children: [
@@ -152,6 +146,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 ),
               )
                   : ListView.builder(
+                key: ValueKey(stories.length),
                 itemCount: stories.length,
                 itemBuilder: (context, index) {
                   final story = stories[index];
@@ -208,7 +203,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
               child: CustomStoryCard(
                 story: story,
                 onTap: () {
-                  ref.read(storyDetailViewModelProvider.notifier).loadStoryDetail(story.id);
+                  ref.read(storyDetailViewModelProvider.notifier).loadStoryDetail(story.id ?? -1);
                   context.push('/story_detail/${story.id}');
                 },
               ),
@@ -293,10 +288,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: CustomHistoryStoryCard(
-                // Giả định CustomHistoryStoryCard nhận HistoryItem
                 story: item,
                 onTap: () {
-                  ref.read(storyDetailViewModelProvider.notifier).loadStoryDetail(item.storyId);
+                  ref.read(storyDetailViewModelProvider.notifier).loadStoryDetail(item.storyId ?? -1);
                   context.push('/story_detail/${item.storyId}');
                 },
               ),
@@ -352,7 +346,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
-              ref.read(deleteStoryViewModelProvider.notifier).deleteStory(story.id, userId);
+              ref.read(deleteStoryViewModelProvider.notifier).deleteStory(story.id ?? -1, userId);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Đang xóa "${story.title}"...')),
