@@ -1,15 +1,14 @@
 import 'dart:io';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:read_it/services/viewmodels/create_story_viewmodel.dart';
 import 'package:read_it/widgets/custom_text_field.dart';
 import '../../providers/api_providers.dart';
 import '../../services/file_picker_service.dart';
+import '../../viewmodels/stories/story_form_viewmodel.dart';
 
 class CreateNewStoryScreen extends ConsumerStatefulWidget {
   final int storyId;
@@ -29,16 +28,18 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
 
   final TextEditingController storyTitleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     if (widget.storyId != -1) {
       Future.microtask(() async {
         final story = await ref.read(storyRepositoryProvider).getStoryDetail(widget.storyId);
         if (story != null) {
           setState(() {
-            storyTitleController.text = story.title;
+            storyTitleController.text = story.title ?? "Loading...";
             descriptionController.text = story.description ?? "";
             image = story.coverLink ?? '';
           });
@@ -49,7 +50,6 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final homeState = ref.watch(createStoryViewModelProvider);
     final bool isEdit = widget.storyId != -1;
 
     return Scaffold(
@@ -174,23 +174,34 @@ class _CreateNewStoryScreenState extends ConsumerState<CreateNewStoryScreen> {
                         ),
                       ),
                       const SizedBox(height: 12,),
-                      Text(
-                        'Categories',
-                        style: Theme.of(context).textTheme.displayMedium,
+                      CustomTextField(
+                        label: 'Categories',
+                        hint: 'Enter a comma-separated list of categories',
+                        isPassword: false,
+                        controller: categoryController
                       ),
                       const SizedBox(height: 24,),
                       SizedBox(
                         height: 56,
                         child: FilledButton(
-                            onPressed: () {
-                              ref.read(createStoryViewModelProvider.notifier).createStory(
-                                storyTitleController.text,
-                                descriptionController.text,
-                                _selectedImagePath != null ? File(_selectedImagePath!) : null,
+                            onPressed: () async {
+                              await ref.read(storyFormViewModelProvider.notifier).submitStory(
+                                storyId: widget.storyId,
+                                title: storyTitleController.text,
+                                description: descriptionController.text,
+                                poster: _selectedImagePath != null ? File(_selectedImagePath!) : null,
                               );
-                              final result = ref.read(createStoryViewModelProvider);
-                              final newStory = result.story.value?.data?.storyId;
-                              context.push('/upload_chapter/${newStory}/-1');
+                              final currentState = ref.read(storyFormViewModelProvider);
+                              if (currentState.isSuccess && mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Thao tác thành công!')),
+                                );
+                                context.pop();
+                              } else if (currentState.error != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Lỗi: ${currentState.error}')),
+                                );
+                              }
                             },
                             style: FilledButton.styleFrom(
                               shape: RoundedRectangleBorder(
