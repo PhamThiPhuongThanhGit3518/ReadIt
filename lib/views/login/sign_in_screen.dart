@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:read_it/widgets/custom_continue_card.dart';
 
-import '../../services/viewmodels/auth_viewmodel.dart';
+import '../../viewmodels/auth/auth_viewmodel.dart';
 import '../../widgets/custom_text_field.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
