@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:read_it/services/viewmodels/story_list_viewmodel.dart';
 import 'package:read_it/widgets/custom_popular_story_card.dart';
 import 'package:read_it/widgets/custom_story_card.dart';
+import '../../viewmodels/stories/story_list_viewmodel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
