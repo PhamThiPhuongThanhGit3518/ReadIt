@@ -1,102 +1,150 @@
-# ReadIt
+# 📚 ReadIt - Ứng dụng đọc truyện
 
 Ứng dụng đọc truyện được xây dựng bằng **Flutter**, hướng đến trải nghiệm đọc hiện đại trên mobile. ReadIt hỗ trợ cả **người đọc** lẫn **tác giả**: người dùng có thể khám phá truyện, theo dõi truyện yêu thích, đọc offline; trong khi tác giả có thể tạo truyện mới, chỉnh sửa nội dung và tải chương lên hệ thống.
 
-## Tính năng chính
+---
 
-### Dành cho người đọc
+## 📸 Hình ảnh ứng dụng
 
-* Đăng ký, đăng nhập tài khoản.
-* Xem danh sách truyện mới cập nhật.
-* Xem truyện phổ biến theo lượt xem.
-* Tìm kiếm truyện theo tên truyện hoặc tác giả.
-* Xem chi tiết truyện, danh sách chương và thông tin cơ bản.
-* Đọc chương online.
-* Thêm / bỏ truyện khỏi danh sách yêu thích.
-* Tải chương về để đọc offline.
-* Quản lý thư viện cá nhân gồm:
-
-  * Truyện yêu thích
-  * Chương đã tải offline
-  * Lịch sử đọc
-
-### Dành cho tác giả
-
-* Tạo truyện mới.
-* Cập nhật thông tin truyện.
-* Tải chương truyện lên hệ thống.
-* Chỉnh sửa chương đã đăng.
-* Xóa truyện hoặc xóa chương.
-* Quản lý danh sách truyện đã xuất bản trong thư viện cá nhân.
-
-## Công nghệ sử dụng
-
-* **Flutter**
-* **Dart**
-* **Riverpod / Flutter Riverpod** để quản lý state
-* **GoRouter** để điều hướng màn hình
-* **Dio + Retrofit** để gọi REST API
-* **Isar Community** để lưu dữ liệu offline
-* **SharedPreferences** để lưu token đăng nhập
-* **Image Picker / File Picker / Photo Manager** để chọn ảnh và file chương truyện
-* **Flutter SVG** để hiển thị icon SVG
-
-## Kiến trúc tổng quan
-
-Dự án được tổ chức theo hướng tách lớp rõ ràng:
-
-* `views/`: giao diện người dùng
-* `viewmodels/`: xử lý logic hiển thị và state
-* `repositories/`: trung gian làm việc với API service
-* `services/`: cấu hình API, file picker và các service liên quan
-* `providers/`: khai báo Riverpod providers
-* `database/`: model và xử lý dữ liệu local bằng Isar
-* `widgets/`: các widget tái sử dụng
-
-## Luồng chức năng chính
-
-1. Người dùng đăng nhập hoặc đăng ký tài khoản.
-2. Ứng dụng lấy dữ liệu truyện từ backend và hiển thị ở màn hình Home.
-3. Người dùng có thể tìm kiếm truyện, mở trang chi tiết và đọc từng chương.
-4. Khi muốn đọc offline, người dùng tải chương về và dữ liệu được lưu local bằng Isar.
-5. Nếu tài khoản có quyền tác giả, người dùng có thể tạo truyện mới, cập nhật truyện và đăng chương.
-
-Một số nhóm endpoint chính:
-
-* `auth`: đăng ký, đăng nhập, lấy thông tin người dùng
-* `users`: hồ sơ người dùng, phân quyền
-* `stories`: tạo truyện, tìm kiếm, lấy truyện mới, truyện phổ biến, yêu thích, chương truyện
-
-
-## Tính năng offline
-
-ReadIt hỗ trợ lưu chương truyện để đọc ngoại tuyến bằng **Isar**. Dữ liệu offline gồm các thông tin:
-
-* ID truyện
-* ID chương
-* Tên truyện
-* Tên chương
-* Số thứ tự chương
-* Nội dung chương
-* Thời điểm tải về
-
-## Ghi chú
-
-* Ứng dụng hiện được cấu hình theme tối (dark theme).
-* Token xác thực được lưu trong `SharedPreferences` và tự động gắn vào header `Authorization` khi gọi API.
-* Một số màn hình social login (Google / Apple) mới dừng ở giao diện, chưa thấy phần xử lý hoàn chỉnh trong luồng hiện tại.
-* Tab Reviews ở trang chi tiết truyện hiện mới là placeholder giao diện.
-
-## Hướng phát triển đề xuất
-
-* Hoàn thiện đăng nhập Google / Apple.
-* Bổ sung hệ thống đánh giá và bình luận truyện.
-* Đồng bộ tiến độ đọc giữa nhiều thiết bị.
-* Bổ sung bộ lọc theo thể loại, trạng thái truyện và tác giả.
-* Tối ưu giao diện hồ sơ cá nhân và phần cài đặt.
-
-## Tác giả
-
-Developed by **PhamThiPhuongThanhGit3518**.
+### 🔐 Đăng ký & Đăng nhập
+| Đăng ký | Đăng nhập |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/7eab63fe-afcf-4ab6-ae36-502ceea9de4c" width="280"> | <img src="https://github.com/user-attachments/assets/54ee53ea-acd1-4c8e-ab28-c8a02242edc7" width="280"> |
 
 ---
+
+### 🏠 Màn hình chính
+| Trang chủ | Trang lọc truyện |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/0d682fa3-ee84-4231-808d-d32025b48002" width="280"> | <img src="https://github.com/user-attachments/assets/205f3571-7dce-4af6-b976-d1daec3e1c48" width="280"> |
+
+---
+
+### 📖 Đọc truyện
+| Trang giới thiệu | Danh sách chap | Đọc chapter |
+| :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/fe06981f-0d78-463e-9607-072716b840c8" width="280"> | <img src="https://github.com/user-attachments/assets/b02644f4-6ba0-410e-bc26-04578f4a84ce" width="280"> | <img src="https://github.com/user-attachments/assets/9bf32329-17bc-467c-9340-1ef540ad54cb" width="280"> |
+
+---
+
+### 📚 Thư viện & Quản lý truyện
+| Truyện của tôi | Đọc offline | Thêm truyện |
+| :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/1507520b-7fd4-4e32-98f4-d773de08cd6f" width="220"> | <img src="https://github.com/user-attachments/assets/9b1e2f0b-6460-4038-bf70-703a2b168545" width="220"> | <img src="https://github.com/user-attachments/assets/cd8165e2-e5ef-4d92-ad5b-cdacc746a396" width="220"> |
+
+| Sửa truyện | Thêm chap | Sửa chap |
+| :---: | :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/15324a6c-6947-4ee0-912e-16d76e42c79f" width="220"> | <img src="https://github.com/user-attachments/assets/1ea6f034-84b9-4c3c-8e35-d5ae692baae9" width="220"> | <img src="https://github.com/user-attachments/assets/1347acc6-dc03-459e-8fcf-65b2c00cb845" width="220"> |
+
+---
+
+### 👤 Trang cá nhân
+| Trang cá nhân | Lịch sử đọc |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/4efc3ce5-5dc4-445c-a282-a65e6a19e182" width="280"> | <img src="https://github.com/user-attachments/assets/cb03306d-b6f2-47fa-976c-4837c04ce280" width="280"> |
+
+---
+
+## 🚀 Tính năng nổi bật
+
+### 👤 Dành cho người đọc
+- Đăng ký, đăng nhập tài khoản  
+- Xem danh sách truyện mới và truyện phổ biến  
+- Tìm kiếm truyện theo tên hoặc tác giả  
+- Xem chi tiết truyện và danh sách chương  
+- Đọc truyện online  
+- Thêm / bỏ truyện yêu thích  
+- Tải chương để đọc offline  
+- Quản lý thư viện cá nhân:
+  - Truyện yêu thích  
+  - Chương đã tải  
+  - Lịch sử đọc  
+
+---
+
+### ✍️ Dành cho tác giả
+- Tạo và quản lý truyện  
+- Cập nhật thông tin truyện  
+- Đăng và chỉnh sửa chương  
+- Xóa truyện hoặc chương  
+- Quản lý danh sách truyện đã xuất bản  
+
+---
+
+## 🛠 Công nghệ sử dụng
+
+- **Flutter** – Framework chính  
+- **Dart** – Ngôn ngữ lập trình  
+- **Riverpod** – Quản lý state & DI  
+- **GoRouter** – Điều hướng  
+- **Dio + Retrofit** – Gọi REST API  
+- **Isar Database** – Lưu trữ dữ liệu offline  
+- **SharedPreferences** – Lưu token đăng nhập  
+- **Image Picker / File Picker / Photo Manager** – Upload ảnh & file  
+- **Flutter SVG** – Hiển thị icon  
+
+---
+
+## 🏗 Kiến trúc
+
+Dự án được tổ chức theo mô hình **MVVM**:
+
+- `views/` – UI  
+- `viewmodels/` – Xử lý logic  
+- `repositories/` – Giao tiếp API  
+- `services/` – Cấu hình service  
+- `providers/` – State management  
+- `database/` – Lưu trữ local  
+- `widgets/` – Component tái sử dụng  
+
+---
+
+## 🔄 Luồng hoạt động
+
+1. Người dùng đăng ký / đăng nhập  
+2. Ứng dụng lấy dữ liệu từ backend và hiển thị  
+3. Người dùng tìm kiếm, đọc truyện  
+4. Tải chương để đọc offline (Isar)  
+5. Tác giả có thể tạo và quản lý nội dung  
+
+---
+
+## 📡 API
+
+- `auth` – đăng nhập, đăng ký  
+- `users` – thông tin người dùng  
+- `stories` – truyện, chương, yêu thích  
+
+---
+
+## 💾 Offline
+
+Ứng dụng hỗ trợ lưu chapter để đọc offline:
+
+- ID truyện, ID chương  
+- Nội dung chapter  
+- Thời điểm tải  
+
+---
+
+## 📌 Ghi chú
+
+- Hỗ trợ **dark mode**  
+- Token được lưu trong `SharedPreferences`  
+- Tự động gắn vào header Authorization  
+
+---
+
+## 🚀 Hướng phát triển
+
+- Social login (Google / Apple)  
+- Bình luận & đánh giá  
+- Đồng bộ đa thiết bị  
+- Bộ lọc nâng cao  
+- Tối ưu UI/UX  
+
+---
+
+## 👨‍💻 Tác giả
+
+Developed by **PhamThiPhuongThanhGit3518**
